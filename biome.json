@@ -10,7 +10,7 @@
     "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
     "ignore": [
       "**/node_modules/**",
-      "**/dist/**",
+      "**/.next/**",
       "**/components/ui/**",
       "**/generated/**"
     ]

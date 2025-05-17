@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
+    "auth:generate": "pnpm dlx @better-auth/cli generate",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"

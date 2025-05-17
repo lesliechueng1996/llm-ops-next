@@ -8,6 +8,13 @@
       "when": 1747483581478,
       "tag": "0000_small_brood",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1747484453230,
+      "tag": "0001_light_shatterstar",
+      "breakpoints": true
     }
   ]
 }

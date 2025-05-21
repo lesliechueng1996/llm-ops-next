@@ -27,27 +27,25 @@ import {
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { signIn } from '@/lib/auth/auth-client';
-import { emailSchema, passwordSchema } from '@/lib/schemas';
+import { credentialLoginReqSchema } from '@/schemas/auth-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SiGithub } from '@icons-pack/react-simple-icons';
 import { User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 // 定义表单验证模式
-const formSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-});
+const formSchema = credentialLoginReqSchema;
 
 type FormValue = z.infer<typeof formSchema>;
 
 const LoginForm = () => {
   // 登录状态管理
   const [loginLoading, setLoginLoading] = useState(false);
-  // const router = useRouter();
+  const router = useRouter();
 
   // 初始化表单
   const form = useForm<FormValue>({
@@ -63,17 +61,23 @@ const LoginForm = () => {
    * @param {FormValue} data - 表单数据，包含邮箱和密码
    */
   const handleSubmit = async (data: FormValue) => {
-    // TODO: 实现邮箱密码登录逻辑
-    // try {
-    //   setLoginLoading(true);
-    //   await credentialLogin(data);
-    //   toast.success('登录成功');
-    //   navigate('/', { replace: true });
-    // } catch (e) {
-    //   toast.error((e as ApiError).message);
-    // } finally {
-    //   setLoginLoading(false);
-    // }
+    try {
+      setLoginLoading(true);
+      const { error } = await signIn.email({
+        email: data.email,
+        password: data.password,
+      });
+      if (error) {
+        toast.error('用户名或密码错误');
+        return;
+      }
+      toast.success('登录成功');
+      router.replace('/');
+    } catch (e) {
+      toast.error('登录失败');
+    } finally {
+      setLoginLoading(false);
+    }
   };
 
   /**

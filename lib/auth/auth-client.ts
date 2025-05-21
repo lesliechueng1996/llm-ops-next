@@ -8,4 +8,5 @@
 import { createAuthClient } from 'better-auth/react';
 
 // 导出认证客户端函数和钩子
-export const { signIn, signUp, useSession } = createAuthClient();
+export const { signIn, signUp, signOut, useSession, getSession } =
+  createAuthClient();

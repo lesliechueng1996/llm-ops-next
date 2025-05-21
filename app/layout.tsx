@@ -17,15 +17,26 @@
  * </RootLayout>
  * ```
  */
+
+// 导入必要的依赖
 import type { Metadata } from 'next';
 import './globals.css';
+import { Toaster } from '@/components/ui/sonner';
 
 // 应用元数据配置
+// 这些配置将用于 SEO 和浏览器标签页显示
 export const metadata: Metadata = {
   title: 'LLM Ops',
   description: 'LLM Ops',
 };
 
+/**
+ * 根布局组件实现
+ *
+ * @param {Object} props - 组件属性
+ * @param {React.ReactNode} props.children - 子组件，将被渲染在布局中
+ * @returns {JSX.Element} 返回包含子组件的 HTML 结构
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,7 +45,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       {/* 全局样式和子组件将被注入到这里 */}
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Toaster 组件用于显示全局通知消息 */}
+        <Toaster position="top-center" richColors closeButton />
+      </body>
     </html>
   );
 }

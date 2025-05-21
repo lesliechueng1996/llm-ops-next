@@ -6,7 +6,7 @@
 
 import { auth } from '@/lib/auth/auth';
 import { db } from '@/lib/db';
-import { user, account } from '@/lib/db/schema';
+import { account, user } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 

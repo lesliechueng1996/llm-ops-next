@@ -6,8 +6,8 @@
  */
 
 import { cn } from '@/lib/utils';
-import type { JSX } from 'react';
 import Link from 'next/link';
+import type { JSX } from 'react';
 
 type Props = {
   /** 菜单项显示的文本标签 */

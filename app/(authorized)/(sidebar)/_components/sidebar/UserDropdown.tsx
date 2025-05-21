@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useSession, signOut } from '@/lib/auth/auth-client';
+import { signOut, useSession } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
 import { redirect } from 'next/navigation';
 import { useBoolean } from 'usehooks-ts';

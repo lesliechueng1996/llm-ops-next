@@ -12,23 +12,23 @@
 
 'use client';
 
-import ImageUpload from '@/components/ImageUpload';
-import LabelWrap from '@/components/LabelWrap';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import EditableField from './EditableField';
-import { useSession } from '@/lib/auth/auth-client';
-import {
-  updateAvatarReqSchema,
-  updateNameReqSchema,
-  updatePasswordReqSchema,
-} from '@/schemas/user-schema';
 import {
   updateAvatarAction,
   updateNameAction,
   updatePasswordAction,
 } from '@/actions/user-action';
+import ImageUpload from '@/components/ImageUpload';
+import LabelWrap from '@/components/LabelWrap';
+import { useSession } from '@/lib/auth/auth-client';
 import { getActionErrorMsg } from '@/lib/utils';
+import {
+  updateAvatarReqSchema,
+  updateNameReqSchema,
+  updatePasswordReqSchema,
+} from '@/schemas/user-schema';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import EditableField from './EditableField';
 
 const AccountSetting = () => {
   const { data: session, refetch } = useSession();

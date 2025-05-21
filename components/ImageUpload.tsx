@@ -26,6 +26,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { ALLOWED_IMAGE_EXTENSIONS, ALLOWED_IMAGE_SIZE } from '@/lib/entity';
 import { cn } from '@/lib/utils';
+import { getActionErrorMsg } from '@/lib/utils';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import COS from 'cos-js-sdk-v5';
 import { Eye, Plus, Trash2 } from 'lucide-react';
@@ -37,7 +38,6 @@ import {
   useState,
 } from 'react';
 import { toast } from 'sonner';
-import { getActionErrorMsg } from '@/lib/utils';
 
 /**
  * ImageUpload 组件的引用类型定义

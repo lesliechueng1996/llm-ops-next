@@ -25,9 +25,9 @@ import {
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { ALLOWED_IMAGE_EXTENSIONS, ALLOWED_IMAGE_SIZE } from '@/lib/entity';
+import { log } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { getActionErrorMsg } from '@/lib/utils';
-import { log } from '@/lib/logger';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import COS from 'cos-js-sdk-v5';
 import { Eye, Plus, Trash2 } from 'lucide-react';

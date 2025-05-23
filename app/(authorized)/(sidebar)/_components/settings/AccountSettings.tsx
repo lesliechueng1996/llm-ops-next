@@ -20,6 +20,7 @@ import {
 import ImageUpload from '@/components/ImageUpload';
 import LabelWrap from '@/components/LabelWrap';
 import { useSession } from '@/lib/auth/auth-client';
+import { log } from '@/lib/logger';
 import { getActionErrorMsg } from '@/lib/utils';
 import {
   updateAvatarReqSchema,
@@ -29,7 +30,6 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 import EditableField from './EditableField';
-import { log } from '@/lib/logger';
 
 const AccountSetting = () => {
   const { data: session, refetch } = useSession();

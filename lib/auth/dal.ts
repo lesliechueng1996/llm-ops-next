@@ -5,8 +5,8 @@
 
 import { UnauthorizedException } from '@/exceptions';
 import { headers } from 'next/headers';
-import { auth } from './auth';
 import { log } from '../logger';
+import { auth } from './auth';
 
 /**
  * 验证 API 密钥的有效性

@@ -27,6 +27,7 @@ import { Separator } from '@/components/ui/separator';
 import { ALLOWED_IMAGE_EXTENSIONS, ALLOWED_IMAGE_SIZE } from '@/lib/entity';
 import { cn } from '@/lib/utils';
 import { getActionErrorMsg } from '@/lib/utils';
+import { log } from '@/lib/logger';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import COS from 'cos-js-sdk-v5';
 import { Eye, Plus, Trash2 } from 'lucide-react';
@@ -190,7 +191,7 @@ const ImageUpload = ({
 
       return await promise;
     } catch (error) {
-      console.error('error', error);
+      log.error('图片上传失败:', error);
       toast.error('上传失败');
       return null;
     } finally {

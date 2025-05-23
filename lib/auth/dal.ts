@@ -6,6 +6,7 @@
 import { UnauthorizedException } from '@/exceptions';
 import { headers } from 'next/headers';
 import { auth } from './auth';
+import { log } from '../logger';
 
 /**
  * 验证 API 密钥的有效性
@@ -25,13 +26,13 @@ export const verifyApiKey = async () => {
 
   // 检查 API 密钥是否存在
   if (!apiKey) {
-    console.error('No API key provided');
+    log.error('No API key provided');
     throw new UnauthorizedException('No API key provided');
   }
 
   // 验证 API 密钥格式
   if (!apiKey.startsWith('Bearer ')) {
-    console.error('Invalid API key format');
+    log.error('Invalid API key format');
     throw new UnauthorizedException('Invalid API key format');
   }
 
@@ -51,7 +52,7 @@ export const verifyApiKey = async () => {
 
   // 验证结果处理
   if (!valid || !apiKeyRecord) {
-    console.error('Invalid API key', error);
+    log.error('Invalid API key', error);
     throw new UnauthorizedException('Invalid API key');
   }
 

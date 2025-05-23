@@ -17,6 +17,7 @@ import { createSafeActionClient } from 'next-safe-action';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { log } from './logger';
 
 // 创建基础安全操作客户端，配置元数据模式和错误处理
 export const actionClient = createSafeActionClient({
@@ -29,9 +30,9 @@ export const actionClient = createSafeActionClient({
   // 统一的错误处理逻辑
   handleServerError: (error, utils) => {
     const { clientInput, metadata } = utils;
-    console.error('clientInput', clientInput);
-    console.error('metadata', metadata);
-    console.error(error);
+    log.error('clientInput', clientInput);
+    log.error('metadata', metadata);
+    log.error('Error:', error);
     if (error instanceof BaseException) {
       return error.message;
     }
@@ -42,10 +43,10 @@ export const actionClient = createSafeActionClient({
   const startTime = performance.now();
   const result = await next();
   const endTime = performance.now();
-  console.log('Result ->', result);
-  console.log('Client input ->', clientInput);
-  console.log('Metadata ->', metadata);
-  console.log('Action execution took', endTime - startTime, 'ms');
+  log.debug('Result ->', result);
+  log.debug('Client input ->', clientInput);
+  log.debug('Metadata ->', metadata);
+  log.debug('Action execution took', endTime - startTime, 'ms');
   return result;
 });
 
@@ -64,9 +65,9 @@ export const authActionClient = actionClient.use(async ({ next }) => {
     .from(session)
     .where(eq(session.token, token));
 
-  console.log('sessionRecord', sessionRecord);
+  log.debug('sessionRecord', sessionRecord);
   if (!sessionRecord || sessionRecord.length === 0) {
-    console.error('Unauthorized', sessionToken);
+    log.error('Unauthorized', sessionToken);
     redirect('/login');
   }
 

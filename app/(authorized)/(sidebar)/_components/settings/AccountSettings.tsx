@@ -29,6 +29,7 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 import EditableField from './EditableField';
+import { log } from '@/lib/logger';
 
 const AccountSetting = () => {
   const { data: session, refetch } = useSession();
@@ -110,6 +111,7 @@ const AccountSetting = () => {
       return;
     }
     try {
+      log.info('Start update avatar');
       setIsLoading(true);
       const res = await updateAvatarAction({ avatar: url });
       if (!res?.data) {
@@ -120,6 +122,8 @@ const AccountSetting = () => {
       toast.success('头像更新成功');
     } catch (error) {
       toast.error('头像更新失败');
+    } finally {
+      setIsLoading(false);
     }
   };
 

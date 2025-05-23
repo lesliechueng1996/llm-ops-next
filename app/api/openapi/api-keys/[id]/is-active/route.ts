@@ -25,8 +25,6 @@ type Params = { params: Promise<{ id: string }> };
  *       - OpenAPI
  *     summary: 修改 API 秘钥状态
  *     description: 该接口用于修改指定 API 秘钥的激活状态
- *     security:
- *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

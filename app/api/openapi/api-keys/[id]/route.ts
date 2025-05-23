@@ -21,8 +21,6 @@ type Params = { params: Promise<{ id: string }> };
  *       - OpenAPI
  *     summary: 删除指定的 API 秘钥
  *     description: 该接口用于在后端删除指定的 API 秘钥信息，删除后该秘钥接口无法使用
- *     security:
- *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -66,8 +64,6 @@ export async function DELETE(_: Request, { params }: Params) {
  *       - OpenAPI
  *     summary: 修改指定的 API 秘钥
  *     description: 该接口用于修改指定 API 秘钥的基础信息，涵盖是否激活和备注信息
- *     security:
- *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

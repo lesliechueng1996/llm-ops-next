@@ -5,9 +5,13 @@
  */
 
 import { verifyApiKey } from '@/lib/auth/dal';
+import { loadPageReqParams } from '@/lib/paginator';
 import { handleRouteError, successResult } from '@/lib/route-common';
-import { createApiKeyReqSchema } from '@/schemas/openapi-schema';
-import { createApiKey } from '@/services/openapi';
+import {
+  createApiKeyReqSchema,
+  getApiKeyListReqSchema,
+} from '@/schemas/openapi-schema';
+import { createApiKey, listApiKeysByPage } from '@/services/openapi';
 
 /**
  * @swagger
@@ -165,4 +169,13 @@ export async function POST(request: Request) {
  *                   type: string
  *                   example: 获取API秘钥列表成功
  */
-export async function GET(request: Request) {}
+export async function GET(request: Request) {
+  try {
+    const { userId } = await verifyApiKey();
+    const pageReq = getApiKeyListReqSchema.parse(loadPageReqParams(request));
+    const result = await listApiKeysByPage(userId, pageReq);
+    return successResult(result);
+  } catch (err) {
+    return handleRouteError(err);
+  }
+}

@@ -1,0 +1,1 @@
+ALTER TABLE "apikey" DROP COLUMN "remark";

@@ -1,4 +1,15 @@
 /**
+ * API 密钥管理相关的路由处理
+ * 提供创建和获取 API 密钥的功能
+ * @module api/openapi/api-keys
+ */
+
+import { verifyApiKey } from '@/lib/auth/dal';
+import { handleRouteError, successResult } from '@/lib/route-common';
+import { createApiKeyReqSchema } from '@/schemas/openapi-schema';
+import { createApiKey } from '@/services/openapi';
+
+/**
  * @swagger
  * /api/openapi/api-keys:
  *   post:
@@ -35,11 +46,37 @@
  *                   example: success
  *                 data:
  *                   type: object
+ *                   properties:
+ *                     key:
+ *                       type: string
+ *                       description: API 秘钥
+ *                       example: llmops-v1/k6FINx4SHb1UdqQwprDDA7d52f03d56acae2ae3c69637ac351f5e983507b5
+ *                     isActive:
+ *                       type: boolean
+ *                       description: 是否激活
+ *                       example: true
  *                 message:
  *                   type: string
  *                   example: 创建API秘钥成功
  */
-export async function POST(request: Request) {}
+export async function POST(request: Request) {
+  try {
+    const { userId } = await verifyApiKey();
+    const data = await request.json();
+    const { isActive, remark } = createApiKeyReqSchema.parse(data);
+    const apiKey = await createApiKey(userId, isActive, remark ?? '');
+    return successResult(
+      {
+        key: apiKey.key,
+        isActive: apiKey.enabled,
+      },
+      201,
+      '创建API秘钥成功',
+    );
+  } catch (err) {
+    return handleRouteError(err);
+  }
+}
 
 /**
  * @swagger

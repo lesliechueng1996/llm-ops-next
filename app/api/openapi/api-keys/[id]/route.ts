@@ -1,3 +1,16 @@
+/**
+ * API 密钥管理路由处理模块
+ *
+ * 该模块提供了对单个 API 密钥进行管理的接口，包括删除和更新操作。
+ * 所有接口都需要通过 API 密钥认证才能访问。
+ */
+
+import { verifyApiKey } from '@/lib/auth/dal';
+import { handleRouteError, successResult } from '@/lib/route-common';
+import { updateApiKeyReqSchema } from '@/schemas/openapi-schema';
+import { deleteApiKey, updateApiKey } from '@/services/openapi';
+
+// 路由参数类型定义
 type Params = { params: Promise<{ id: string }> };
 
 /**
@@ -34,7 +47,16 @@ type Params = { params: Promise<{ id: string }> };
  *                   type: string
  *                   example: 删除API秘钥成功
  */
-export async function DELETE(request: Request, { params }: Params) {}
+export async function DELETE(_: Request, { params }: Params) {
+  try {
+    const { userId } = await verifyApiKey();
+    const { id } = await params;
+    await deleteApiKey(userId, id);
+    return successResult({}, 200, '删除API秘钥成功');
+  } catch (err) {
+    return handleRouteError(err);
+  }
+}
 
 /**
  * @swagger
@@ -86,4 +108,15 @@ export async function DELETE(request: Request, { params }: Params) {}
  *                   type: string
  *                   example: 修改API秘钥成功
  */
-export async function PATCH(request: Request, { params }: Params) {}
+export async function PATCH(request: Request, { params }: Params) {
+  try {
+    const { userId } = await verifyApiKey();
+    const { id } = await params;
+    const data = await request.json();
+    const { isActive, remark } = updateApiKeyReqSchema.parse(data);
+    await updateApiKey(userId, id, isActive, remark ?? '');
+    return successResult({}, 200, '修改API秘钥成功');
+  } catch (err) {
+    return handleRouteError(err);
+  }
+}

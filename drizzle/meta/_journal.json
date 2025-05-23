@@ -22,6 +22,13 @@
       "when": 1747929442242,
       "tag": "0002_aromatic_falcon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1747931835999,
+      "tag": "0003_broken_pandemic",
+      "breakpoints": true
     }
   ]
 }

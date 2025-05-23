@@ -1,3 +1,20 @@
+/**
+ * API 秘钥状态管理路由
+ *
+ * 该模块提供了修改 API 秘钥激活状态的接口。
+ * 主要用于启用或禁用特定的 API 秘钥。
+ */
+
+import { verifyApiKey } from '@/lib/auth/dal';
+import { handleRouteError, successResult } from '@/lib/route-common';
+import { updateApiKeyIsActiveReqSchema } from '@/schemas/openapi-schema';
+import { updateApiKeyIsActive } from '@/services/openapi';
+
+/**
+ * 路由参数类型定义
+ * @typedef {Object} Params
+ * @property {Promise<{id: string}>} params - 包含 API 秘钥 ID 的参数对象
+ */
 type Params = { params: Promise<{ id: string }> };
 
 /**
@@ -46,4 +63,15 @@ type Params = { params: Promise<{ id: string }> };
  *                   type: string
  *                   example: 修改API秘钥状态成功
  */
-export async function PATCH(request: Request, { params }: Params) {}
+export async function PATCH(request: Request, { params }: Params) {
+  try {
+    const { userId } = await verifyApiKey();
+    const { id } = await params;
+    const data = await request.json();
+    const { isActive } = updateApiKeyIsActiveReqSchema.parse(data);
+    await updateApiKeyIsActive(userId, id, isActive);
+    return successResult({}, 200, '修改API秘钥状态成功');
+  } catch (err) {
+    return handleRouteError(err);
+  }
+}

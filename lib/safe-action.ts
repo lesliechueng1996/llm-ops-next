@@ -30,9 +30,9 @@ export const actionClient = createSafeActionClient({
   // 统一的错误处理逻辑
   handleServerError: (error, utils) => {
     const { clientInput, metadata } = utils;
-    log.error('clientInput', clientInput);
-    log.error('metadata', metadata);
-    log.error('Error:', error);
+    log.error('clientInput: %o', clientInput);
+    log.error('metadata: %o', metadata);
+    log.error('Error: %o', error);
     if (error instanceof BaseException) {
       return error.message;
     }
@@ -43,10 +43,10 @@ export const actionClient = createSafeActionClient({
   const startTime = performance.now();
   const result = await next();
   const endTime = performance.now();
-  log.debug('Result ->', result);
-  log.debug('Client input ->', clientInput);
-  log.debug('Metadata ->', metadata);
-  log.debug('Action execution took', endTime - startTime, 'ms');
+  log.debug('Result -> %o', result);
+  log.debug('Client input -> %o', clientInput);
+  log.debug('Metadata -> %o', metadata);
+  log.debug('Action execution took: %dms', endTime - startTime);
   return result;
 });
 
@@ -65,9 +65,9 @@ export const authActionClient = actionClient.use(async ({ next }) => {
     .from(session)
     .where(eq(session.token, token));
 
-  log.debug('sessionRecord', sessionRecord);
+  log.debug('sessionRecord: %o', sessionRecord);
   if (!sessionRecord || sessionRecord.length === 0) {
-    log.error('Unauthorized', sessionToken);
+    log.error('Unauthorized: %s', sessionToken);
     redirect('/login');
   }
 

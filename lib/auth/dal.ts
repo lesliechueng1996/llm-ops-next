@@ -52,7 +52,7 @@ export const verifyApiKey = async () => {
 
   // 验证结果处理
   if (!valid || !apiKeyRecord) {
-    log.error('Invalid API key', error);
+    log.error('Invalid API key: %o', error);
     throw new UnauthorizedException('Invalid API key');
   }
 

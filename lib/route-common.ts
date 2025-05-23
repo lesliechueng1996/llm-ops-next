@@ -16,7 +16,7 @@ export const handleRouteError = (error: unknown) => {
   // 处理 Zod 验证错误
   if (error instanceof ZodError) {
     const formattedError = error.format();
-    log.error('请求参数错误', formattedError);
+    log.error('请求参数错误: %o', formattedError);
     return Response.json(
       {
         code: 'BAD_REQUEST',
@@ -31,7 +31,7 @@ export const handleRouteError = (error: unknown) => {
 
   // 处理自定义业务异常
   if (error instanceof BaseException) {
-    log.error('业务异常:', error);
+    log.error('业务异常: %o', error);
     return Response.json(
       {
         code: error.resultCode,
@@ -45,7 +45,7 @@ export const handleRouteError = (error: unknown) => {
   }
 
   // 处理未知错误
-  log.error('未知错误:', error);
+  log.error('未知错误: %o', error);
   return Response.json(
     {
       code: 'INTERNAL_SERVER_ERROR',

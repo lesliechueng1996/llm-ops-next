@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev | pino-pretty --colorize --translateTime 'SYS:standard' --ignore 'pid,hostname' --messageFormat '{msg} {context}'",
     "build": "next build",
     "start": "next start",
     "lint": "biome check .",

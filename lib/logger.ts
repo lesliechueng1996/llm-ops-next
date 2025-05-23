@@ -52,13 +52,4 @@ const logger = isBrowser
  * - error: 错误信息
  * - fatal: 致命错误信息
  */
-export const log = {
-  debug: (message: string, ...args: unknown[]) =>
-    logger.debug(message, ...args),
-  info: (message: string, ...args: unknown[]) => logger.info(message, ...args),
-  warn: (message: string, ...args: unknown[]) => logger.warn(message, ...args),
-  error: (message: string, ...args: unknown[]) =>
-    logger.error(message, ...args),
-  fatal: (message: string, ...args: unknown[]) =>
-    logger.fatal(message, ...args),
-};
+export const log = logger;

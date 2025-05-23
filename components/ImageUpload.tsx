@@ -191,7 +191,7 @@ const ImageUpload = ({
 
       return await promise;
     } catch (error) {
-      log.error('图片上传失败:', error);
+      log.error('图片上传失败: %o', error);
       toast.error('上传失败');
       return null;
     } finally {

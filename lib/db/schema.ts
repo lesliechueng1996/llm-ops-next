@@ -4,6 +4,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uuid,
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
@@ -90,4 +91,22 @@ export const apikey = pgTable('apikey', {
   updatedAt: timestamp('updated_at').notNull(),
   permissions: text('permissions'),
   metadata: text('metadata'),
+});
+
+export const uploadFile = pgTable('upload_file', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  name: text('name').notNull().default(''),
+  key: text('key').notNull().default(''),
+  size: integer('size').notNull().default(0),
+  extension: text('extension').notNull().default(''),
+  mimeType: text('mime_type').notNull().default(''),
+  hash: text('hash').notNull().default(''),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at')
+    .notNull()
+    .defaultNow()
+    .$onUpdateFn(() => new Date()),
 });

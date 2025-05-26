@@ -24,6 +24,34 @@
 - API 文档自动生成
 - 主题切换支持
 - 响应式设计
+- 用户管理功能
+- 增强的 API 文档功能
+
+## API 文档
+
+项目集成了 Swagger UI，提供了完整的 API 文档和交互式测试功能。访问 `/api-doc` 路径可以查看所有可用的 API 端点。
+
+主要 API 端点包括：
+
+- `/api/auth` - 认证相关接口
+  - 支持 OAuth 和凭证认证
+  - 会话管理
+  - 用户注册和登录
+
+- `/api/user` - 用户管理相关接口
+  - `/api/user/name` - 更新用户名
+  - `/api/user/password` - 修改密码
+  - `/api/user/avatar` - 更新头像
+
+- `/api/openapi` - OpenAPI 相关接口
+  - `/api/openapi/chat` - 聊天功能接口
+  - `/api/openapi/api-keys` - API 密钥管理
+
+所有 API 端点都支持以下特性：
+- 完整的请求参数验证
+- 统一的错误处理
+- 详细的 API 文档
+- 支持 Swagger UI 交互式测试
 
 ## 开始使用
 

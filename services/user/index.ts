@@ -4,10 +4,11 @@
  * 包括更新用户名、密码和头像等功能
  */
 
+import { NotFoundException } from '@/exceptions';
 import { auth } from '@/lib/auth/auth';
 import { db } from '@/lib/db';
-import { account, user } from '@/lib/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { account, session, user } from '@/lib/db/schema';
+import { and, desc, eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 
 /**
@@ -65,4 +66,44 @@ export const updateUserAvatarById = async (avatar: string, id: string) => {
       image: avatar,
     })
     .where(eq(user.id, id));
+};
+
+/**
+ * 根据用户ID获取用户详细信息
+ * 包括用户基本信息、最后登录时间和IP地址
+ * @param userId - 用户ID
+ * @returns 包含用户详细信息的对象，包括：
+ *          - id: 用户ID
+ *          - name: 用户名
+ *          - email: 用户邮箱
+ *          - avatar: 用户头像
+ *          - lastLoginAt: 最后登录时间戳
+ *          - lastLoginIp: 最后登录IP地址
+ *          - createdAt: 账号创建时间戳
+ * @throws {NotFoundException} 当用户不存在时抛出异常
+ */
+export const getUserInfoById = async (userId: string) => {
+  const userQuery = db.select().from(user).where(eq(user.id, userId));
+  const sessionQuery = db
+    .select()
+    .from(session)
+    .where(eq(session.userId, userId))
+    .orderBy(desc(session.createdAt))
+    .limit(1);
+
+  const [userInfo, sessionInfo] = await Promise.all([userQuery, sessionQuery]);
+
+  if (!userInfo || userInfo.length === 0) {
+    throw new NotFoundException('用户不存在');
+  }
+
+  return {
+    id: userId,
+    name: userInfo[0].name,
+    email: userInfo[0].email,
+    avatar: userInfo[0].image,
+    lastLoginAt: sessionInfo?.[0]?.updatedAt?.getTime() ?? null,
+    lastLoginIp: sessionInfo?.[0]?.ipAddress ?? null,
+    createdAt: userInfo[0].createdAt.getTime(),
+  };
 };

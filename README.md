@@ -28,6 +28,13 @@
 - 用户管理功能
 - 增强的 API 文档功能
 - 文件上传功能
+- 内置工具集成
+  - 天气查询
+  - IP 地址查询
+  - 维基百科搜索
+  - DuckDuckGo 搜索
+  - DALL-E 图像生成
+  - 时间查询
 
 ## API 文档
 
@@ -52,6 +59,10 @@
 - `/api/upload-files` - 文件上传相关接口
   - `/api/upload-files/file` - 文件上传
   - `/api/upload-files/image` - 图片上传
+
+- `/api/builtin-tools` - 内置工具相关接口
+  - `/api/builtin-tools` - 获取所有内置插件列表信息
+  - `/api/builtin-tools/categories` - 获取内置插件分类列表
 
 所有 API 端点都支持以下特性：
 - 完整的请求参数验证

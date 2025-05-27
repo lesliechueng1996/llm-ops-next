@@ -1,9 +1,12 @@
 import {
   boolean,
+  index,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core';
 
@@ -93,20 +96,75 @@ export const apikey = pgTable('apikey', {
   metadata: text('metadata'),
 });
 
-export const uploadFile = pgTable('upload_file', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  name: text('name').notNull().default(''),
-  key: text('key').notNull().default(''),
-  size: integer('size').notNull().default(0),
-  extension: text('extension').notNull().default(''),
-  mimeType: text('mime_type').notNull().default(''),
-  hash: text('hash').notNull().default(''),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at')
-    .notNull()
-    .defaultNow()
-    .$onUpdateFn(() => new Date()),
-});
+export const uploadFile = pgTable(
+  'upload_file',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    name: text('name').notNull().default(''),
+    key: text('key').notNull().default(''),
+    size: integer('size').notNull().default(0),
+    extension: text('extension').notNull().default(''),
+    mimeType: text('mime_type').notNull().default(''),
+    hash: text('hash').notNull().default(''),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [index('idx_upload_file_user_id').on(table.userId)],
+);
+
+export const apiToolProvider = pgTable(
+  'api_tool_provider',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    name: text('name').notNull().default(''),
+    icon: text('icon').notNull().default(''),
+    description: text('description').notNull().default(''),
+    openapiSchema: text('openapi_schema').notNull().default(''),
+    headers: jsonb('headers').notNull().default('{}'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index('idx_api_tool_provider_user_id').on(table.userId),
+    unique('uq_api_tool_provider_user_id_name').on(table.userId, table.name),
+  ],
+);
+
+export const apiTool = pgTable(
+  'api_tool',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => apiToolProvider.id, { onDelete: 'cascade' }),
+    name: text('name').notNull().default(''),
+    description: text('description').notNull().default(''),
+    url: text('url').notNull().default(''),
+    method: text('method').notNull().default(''),
+    parameters: jsonb('parameters').notNull().default('[]'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index('idx_api_tool_user_id').on(table.userId),
+    unique('uq_api_tool_provider_id_name').on(table.providerId, table.name),
+  ],
+);

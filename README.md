@@ -15,6 +15,7 @@
 - **API 文档**: Swagger UI
 - **代码规范**: Biome
 - **包管理**: pnpm
+- **对象存储**: 腾讯云 COS
 
 ## 功能特性
 
@@ -26,6 +27,7 @@
 - 响应式设计
 - 用户管理功能
 - 增强的 API 文档功能
+- 文件上传功能
 
 ## API 文档
 
@@ -46,6 +48,10 @@
 - `/api/openapi` - OpenAPI 相关接口
   - `/api/openapi/chat` - 聊天功能接口
   - `/api/openapi/api-keys` - API 密钥管理
+
+- `/api/upload-files` - 文件上传相关接口
+  - `/api/upload-files/file` - 文件上传
+  - `/api/upload-files/image` - 图片上传
 
 所有 API 端点都支持以下特性：
 - 完整的请求参数验证

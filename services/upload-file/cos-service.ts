@@ -10,19 +10,19 @@
  * 5. 获取文件访问 URL
  */
 
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import {
   BadRequestException,
   InternalServerErrorException,
 } from '@/exceptions';
 import { ALLOWED_IMAGE_EXTENSIONS, ALLOWED_IMAGE_SIZE } from '@/lib/entity';
-import { format } from 'date-fns';
-import { nanoid } from 'nanoid';
-import path from 'node:path';
-import os from 'node:os';
-import fs from 'node:fs/promises';
-import { getCredential } from 'qcloud-cos-sts';
 import { log } from '@/lib/logger';
 import COS from 'cos-nodejs-sdk-v5';
+import { format } from 'date-fns';
+import { nanoid } from 'nanoid';
+import { getCredential } from 'qcloud-cos-sts';
 
 const cos = new COS({
   SecretId: process.env.TENCENT_COS_SECRET_ID ?? '',

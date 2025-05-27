@@ -63,6 +63,7 @@
 - `/api/builtin-tools` - 内置工具相关接口
   - `/api/builtin-tools` - 获取所有内置插件列表信息
   - `/api/builtin-tools/categories` - 获取内置插件分类列表
+  - `/api/builtin-tools/:provider/tools/:tool` - 获取内置工具信息
 
 所有 API 端点都支持以下特性：
 - 完整的请求参数验证

@@ -35,4 +35,5 @@ export const duckDuckGoSearchToolDefination = {
   ],
   label: 'DuckDuckGo搜索',
   params: [],
+  createdAt: 1722498386,
 };

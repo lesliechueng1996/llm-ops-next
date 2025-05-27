@@ -5,8 +5,8 @@
  * 包含了默认配置和自定义参数的处理。
  */
 
-import { DallEAPIWrapper, type DallEAPIWrapperParams } from '@langchain/openai';
 import { log } from '@/lib/logger';
+import { DallEAPIWrapper, type DallEAPIWrapperParams } from '@langchain/openai';
 
 // DALL-E API 的默认配置
 const defaultOptions = {
@@ -94,4 +94,5 @@ export const dallEToolDefination = {
       ],
     },
   ],
+  createdAt: 1722498386,
 };

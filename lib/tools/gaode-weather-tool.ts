@@ -86,6 +86,7 @@ export const gaodeWeatherToolDefination = {
   ],
   label: '根据城市获取天气信息',
   params: [],
+  createdAt: 1722498386,
 };
 
 /**

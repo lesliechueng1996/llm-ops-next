@@ -5,9 +5,9 @@
  * 使用 date-fns 库进行时间格式化，支持时区显示。
  */
 
+import { log } from '@/lib/logger';
 import { tool } from '@langchain/core/tools';
 import { format } from 'date-fns';
-import { log } from '@/lib/logger';
 
 /**
  * 当前时间工具的定义配置
@@ -19,6 +19,7 @@ export const currentTimeToolDefination = {
   inputs: [],
   label: '获取当前时间',
   params: [],
+  createdAt: 1722498386,
 };
 
 /**

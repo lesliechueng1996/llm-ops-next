@@ -4,22 +4,22 @@
  * 包括搜索、图片生成、天气查询等功能性工具
  */
 
+import type { StructuredTool } from '@langchain/core/tools';
 import {
-  duckDuckGoSearchToolDefination,
+  createCurrentTimeTool,
+  currentTimeToolDefination,
+} from './current-time-tool';
+import { createDallETool, dallEToolDefination } from './dall-e-tool';
+import {
   createDuckDuckGoSearchTool,
+  duckDuckGoSearchToolDefination,
 } from './duck-duck-go-search-tool';
 import { createGaodeIpTool, gaodeIpToolDefination } from './gaode-ip-tool';
 import {
   createGaodeWeatherTool,
   gaodeWeatherToolDefination,
 } from './gaode-weather-tool';
-import { createDallETool, dallEToolDefination } from './dall-e-tool';
 import { createWikipediaTool, wikipediaToolDefination } from './wikipedia-tool';
-import {
-  createCurrentTimeTool,
-  currentTimeToolDefination,
-} from './current-time-tool';
-import type { StructuredTool } from '@langchain/core/tools';
 
 const host = process.env.LLM_OPS_NEXT_HOST;
 
@@ -153,6 +153,7 @@ type BuiltinTool = {
       type: 'string' | 'number' | 'boolean';
     }[];
     params: BuiltinToolParam[];
+    createdAt: number;
     fn: (params: Record<string, unknown>) => StructuredTool;
   }[];
 };

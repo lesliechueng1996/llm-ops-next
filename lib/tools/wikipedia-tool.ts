@@ -35,4 +35,5 @@ export const wikipediaToolDefination = {
   ],
   label: '维基百科搜索',
   params: [],
+  createdAt: 1722498386,
 };

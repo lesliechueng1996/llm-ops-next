@@ -42,13 +42,13 @@ import { getUserInfoById } from '@/services/user';
  *                     avatar:
  *                       type: string
  *                       description: 账号的头像 URL 地址
- *                     last_login_at:
+ *                     lastLoginAt:
  *                       type: integer
  *                       description: 账号最后一次登录时间戳（秒）
- *                     last_login_ip:
+ *                     lastLoginIp:
  *                       type: string
  *                       description: 账号最后一次登录的 ip 地址
- *                     created_at:
+ *                     createdAt:
  *                       type: integer
  *                       description: 账号的注册时间戳（秒）
  *                 message:

@@ -134,7 +134,7 @@ type Params = { params: Promise<{ provider: string; tool: string }> };
  *                                 label:
  *                                   type: string
  *                                   description: 下拉菜单对应的标签
- *                     created_at:
+ *                     createdAt:
  *                       type: integer
  *                       description: 工具的创建时间
  *                 message:

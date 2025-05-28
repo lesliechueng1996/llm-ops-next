@@ -40,7 +40,7 @@ const SUPPORTED_FILE_EXTENSIONS = [
  *                 format: binary
  *                 description: 需要上传的文件，最多支持上传一个文件，最大支持的文件不能超过 15 MB
  *     responses:
- *       200:
+ *       201:
  *         description: 上传成功
  *         content:
  *           application/json:
@@ -58,7 +58,7 @@ const SUPPORTED_FILE_EXTENSIONS = [
  *                       format: uuid
  *                       description: 上传文件的引用 id，类型为 uuid，在知识库模块、应用对话模块会使用该引用文件 id
  *                       example: 46db30d1-3199-4e79-a0cd-abf12fa6858f
- *                     user_id:
+ *                     userId:
  *                       type: string
  *                       format: uuid
  *                       description: 该文件所归属的账号 id，用于标记是哪个账号上传了该文件
@@ -79,11 +79,11 @@ const SUPPORTED_FILE_EXTENSIONS = [
  *                       type: string
  *                       description: 文件的扩展名，例如 .md
  *                       example: .md
- *                     mime_type:
+ *                     mimeType:
  *                       type: string
  *                       description: 文件 mime-type 类型推断
  *                       example: txt
- *                     created_at:
+ *                     createdAt:
  *                       type: integer
  *                       description: 文件的创建时间戳
  *                       example: 1721460914

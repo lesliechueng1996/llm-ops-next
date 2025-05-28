@@ -38,7 +38,7 @@ import { createApiKey, listApiKeysByPage } from '@/services/openapi';
  *                 maxLength: 100
  *                 description: 接口备注信息
  *     responses:
- *       200:
+ *       201:
  *         description: 创建成功
  *         content:
  *           application/json:

@@ -122,7 +122,7 @@ import { getBuiltinTools } from '@/services/builtin-tool';
  *                                         label:
  *                                           type: string
  *                                           description: 下拉菜单对应的标签
- *                       created_at:
+ *                       createdAt:
  *                         type: integer
  *                         description: 创建/发布该服务商插件的时间戳
  *                 message:

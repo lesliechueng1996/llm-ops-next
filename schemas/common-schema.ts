@@ -48,3 +48,17 @@ export const pageReqSchema = z.object({
  * 由 pageReqSchema 推导出的 TypeScript 类型
  */
 export type PageReq = z.infer<typeof pageReqSchema>;
+
+/**
+ * 搜索分页请求参数验证模式
+ * 继承自 pageReqSchema，包含搜索词(searchWord)的验证规则
+ */
+export const searchPageReqSchema = pageReqSchema.extend({
+  searchWord: z.string().optional().default(''),
+});
+
+/**
+ * 搜索分页请求参数类型
+ * 由 searchPageReqSchema 推导出的 TypeScript 类型
+ */
+export type SearchPageReq = z.infer<typeof searchPageReqSchema>;

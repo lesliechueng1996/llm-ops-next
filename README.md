@@ -78,6 +78,8 @@
 - `/api/datasets` - 知识库管理相关接口
   - `/api/datasets` - 创建知识库和获取知识库列表
   - `/api/datasets/:datasetId` - 获取、更新和删除特定知识库
+  - `/api/datasets/:datasetId/documents` - 获取知识库下的文档列表，支持文档名称模糊搜索和分页
+  - `/api/datasets/:datasetId/queries` - 获取知识库最近的查询记录列表（最近10条）
 
 - `/api/upload-files` - 文件上传相关接口
   - `/api/upload-files/file` - 文件上传

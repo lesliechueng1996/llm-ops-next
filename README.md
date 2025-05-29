@@ -40,9 +40,7 @@
 - 增强的 API 文档功能
 - 文件上传功能
 - API 工具管理
-  - 支持自定义 API 工具
-  - API 工具验证
-  - OpenAPI Schema 支持
+- 知识库管理
 - 内置工具集成
   - 天气查询
   - IP 地址查询
@@ -76,6 +74,10 @@
   - `/api/api-tools/:providerId` - 特定提供商的 API 工具
   - `/api/api-tools/:providerId/tools/:toolName` - 特定工具详情
   - `/api/api-tools/openapi-schema/validate` - OpenAPI Schema 验证
+
+- `/api/datasets` - 知识库管理相关接口
+  - `/api/datasets` - 创建知识库和获取知识库列表
+  - `/api/datasets/:datasetId` - 获取、更新和删除特定知识库
 
 - `/api/upload-files` - 文件上传相关接口
   - `/api/upload-files/file` - 文件上传

@@ -150,7 +150,7 @@ export const updateDataset = async (
     throw new BadRequestException('知识库名称已存在');
   }
 
-  await db
+  const updateResult = await db
     .update(dataset)
     .set({
       name,
@@ -159,7 +159,12 @@ export const updateDataset = async (
         description ||
         DEFAULT_DATASET_DESCRIPTION_FORMATTER.replace('{name}', name),
     })
-    .where(and(eq(dataset.id, datasetId), eq(dataset.userId, userId)));
+    .where(and(eq(dataset.id, datasetId), eq(dataset.userId, userId)))
+    .returning();
+
+  if (updateResult.length === 0) {
+    throw new NotFoundException('知识库不存在');
+  }
 };
 
 /**

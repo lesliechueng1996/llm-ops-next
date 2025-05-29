@@ -197,7 +197,7 @@ export const updateApiTool = async (
       .where(
         and(eq(apiTool.providerId, providerId), eq(apiTool.userId, userId)),
       );
-    await tx
+    const updateResult = await tx
       .update(apiToolProvider)
       .set({
         name,
@@ -211,7 +211,12 @@ export const updateApiTool = async (
           eq(apiToolProvider.id, providerId),
           eq(apiToolProvider.userId, userId),
         ),
-      );
+      )
+      .returning();
+
+    if (updateResult.length === 0) {
+      throw new NotFoundException('API工具不存在');
+    }
     await tx.insert(apiTool).values(
       tools.map((tool) => ({
         ...tool,

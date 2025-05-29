@@ -168,3 +168,154 @@ export const apiTool = pgTable(
     unique('uq_api_tool_provider_id_name').on(table.providerId, table.name),
   ],
 );
+
+export const dataset = pgTable(
+  'dataset',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    name: text('name').notNull().default(''),
+    icon: text('icon').notNull().default(''),
+    description: text('description').notNull().default(''),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index('idx_dataset_user_id').on(table.userId),
+    unique('uq_dataset_user_id_name').on(table.userId, table.name),
+  ],
+);
+
+export const processRule = pgTable(
+  'process_rule',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    datasetId: uuid('dataset_id')
+      .notNull()
+      .references(() => dataset.id, { onDelete: 'cascade' }),
+    model: text('model').notNull().default(''),
+    rule: jsonb('rule').notNull().default('{}'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index('idx_process_rule_user_id_dataset_id').on(
+      table.userId,
+      table.datasetId,
+    ),
+  ],
+);
+
+export const document = pgTable(
+  'document',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    datasetId: uuid('dataset_id')
+      .notNull()
+      .references(() => dataset.id, { onDelete: 'cascade' }),
+    uploadFileId: uuid('upload_file_id')
+      .notNull()
+      .references(() => uploadFile.id, { onDelete: 'cascade' }),
+    processRuleId: uuid('process_rule_id')
+      .notNull()
+      .references(() => processRule.id, { onDelete: 'cascade' }),
+    batch: text('batch').notNull().default(''),
+    name: text('name').notNull().default(''),
+    position: integer('position').notNull().default(1),
+    characterCount: integer('character_count').notNull().default(0),
+    tokenCount: integer('token_count').notNull().default(0),
+    processingStartedAt: timestamp('processing_started_at'),
+    parsingCompletedAt: timestamp('parsing_completed_at'),
+    splittingCompletedAt: timestamp('splitting_completed_at'),
+    indexingCompletedAt: timestamp('indexing_completed_at'),
+    completedAt: timestamp('completed_at'),
+    stoppedAt: timestamp('stopped_at'),
+    error: text('error'),
+    enabled: boolean('enabled').notNull().default(false),
+    disabledAt: timestamp('disabled_at'),
+    status: text('status').notNull().default(''),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index('idx_document_user_id_dataset_id').on(table.userId, table.datasetId),
+  ],
+);
+
+export const segment = pgTable(
+  'segment',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    datasetId: uuid('dataset_id')
+      .notNull()
+      .references(() => dataset.id, { onDelete: 'cascade' }),
+    documentId: uuid('document_id')
+      .notNull()
+      .references(() => document.id, { onDelete: 'cascade' }),
+    nodeId: text('node_id'),
+    position: integer('position').notNull().default(1),
+    content: text('content').notNull().default(''),
+    characterCount: integer('character_count').notNull().default(0),
+    tokenCount: integer('token_count').notNull().default(0),
+    keywords: jsonb('keywords').notNull().default('[]'),
+    hash: text('hash').notNull().default(''),
+    hitCount: integer('hit_count').notNull().default(0),
+    enabled: boolean('enabled').notNull().default(false),
+    disabledAt: timestamp('disabled_at'),
+    processingStartedAt: timestamp('processing_started_at'),
+    indexingCompletedAt: timestamp('indexing_completed_at'),
+    completedAt: timestamp('completed_at'),
+    stoppedAt: timestamp('stopped_at'),
+    error: text('error'),
+    status: text('status').notNull().default(''),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index('idx_segment_user_id_dataset_id_document_id').on(
+      table.userId,
+      table.datasetId,
+      table.documentId,
+    ),
+  ],
+);
+
+export const keywordTable = pgTable(
+  'keyword_table',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    datasetId: uuid('dataset_id')
+      .notNull()
+      .references(() => dataset.id, { onDelete: 'cascade' }),
+    keywords: jsonb('keywords').notNull().default('[]'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [unique('uq_keyword_table_dataset_id').on(table.datasetId)],
+);

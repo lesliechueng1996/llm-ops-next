@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 import { document, segment } from '@/lib/db/schema';
 import { calculatePagination, paginationResult } from '@/lib/paginator';
 import type { SearchPageReq } from '@/schemas/common-schema';
-import { and, eq, like, desc, count, inArray, sql } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, like, sql } from 'drizzle-orm';
 
 /**
  * 分页获取文档列表

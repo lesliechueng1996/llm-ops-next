@@ -4,18 +4,29 @@
 
 ## 技术栈
 
-- **框架**: Next.js 15.3.2
-- **语言**: TypeScript
+- **框架**: 
+  - Next.js 15.3.2
+  - React 19
+- **语言**: TypeScript 5
 - **UI 组件**: 
-  - Shadcn
-  - Tailwind CSS
-- **数据库**: PostgreSQL + Drizzle ORM
+  - Shadcn (基于 Radix UI)
+  - Tailwind CSS 4
+- **数据库**: 
+  - PostgreSQL
+  - Drizzle ORM
 - **认证**: Better Auth
-- **表单处理**: React Hook Form + Zod
-- **API 文档**: Swagger UI
+- **表单处理**: 
+  - React Hook Form
+  - Zod 验证
+- **API 文档**: 
+  - Swagger UI
+  - next-swagger-doc
 - **代码规范**: Biome
 - **包管理**: pnpm
 - **对象存储**: 腾讯云 COS
+- **AI 集成**:
+  - LangChain
+  - OpenAI
 
 ## 功能特性
 
@@ -28,6 +39,10 @@
 - 用户管理功能
 - 增强的 API 文档功能
 - 文件上传功能
+- API 工具管理
+  - 支持自定义 API 工具
+  - API 工具验证
+  - OpenAPI Schema 支持
 - 内置工具集成
   - 天气查询
   - IP 地址查询
@@ -55,6 +70,12 @@
 - `/api/openapi` - OpenAPI 相关接口
   - `/api/openapi/chat` - 聊天功能接口
   - `/api/openapi/api-keys` - API 密钥管理
+
+- `/api/api-tools` - API 工具管理接口
+  - `/api/api-tools` - API 工具列表
+  - `/api/api-tools/:providerId` - 特定提供商的 API 工具
+  - `/api/api-tools/:providerId/tools/:toolName` - 特定工具详情
+  - `/api/api-tools/openapi-schema/validate` - OpenAPI Schema 验证
 
 - `/api/upload-files` - 文件上传相关接口
   - `/api/upload-files/file` - 文件上传

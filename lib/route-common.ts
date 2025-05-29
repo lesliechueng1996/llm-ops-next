@@ -15,13 +15,19 @@ import { log } from './logger';
 export const handleRouteError = (error: unknown) => {
   // 处理 Zod 验证错误
   if (error instanceof ZodError) {
-    const formattedError = error.format();
-    log.error('请求参数错误: %o', formattedError);
+    const errorMessage = error.issues
+      .map((item) => {
+        const path = item.path.join('.');
+        return `${path}: ${item.message}`;
+      })
+      .join('\n');
+
+    log.error('请求参数错误: %o', error);
     return Response.json(
       {
         code: 'BAD_REQUEST',
-        data: formattedError,
-        message: '请求参数错误',
+        data: error,
+        message: errorMessage,
       },
       {
         status: 400,

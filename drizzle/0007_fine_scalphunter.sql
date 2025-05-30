@@ -1,0 +1,1 @@
+ALTER TABLE "process_rule" RENAME COLUMN "model" TO "mode";

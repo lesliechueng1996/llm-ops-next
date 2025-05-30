@@ -5,6 +5,13 @@
  * 1. 文件上传相关的配置（图片类型和大小限制）
  * 2. API 工具参数的类型定义和验证
  * 3. OpenAPI 规范的类型定义和验证
+ * 4. 文本处理规则的定义
+ *
+ * 主要组件：
+ * - 图片上传配置：定义允许的图片格式和大小限制
+ * - API 参数验证：使用 Zod 定义参数验证规则
+ * - OpenAPI 规范：定义 API 文档的结构和验证规则
+ * - 文本处理规则：定义默认的文本预处理和分段规则
  */
 
 import { z } from 'zod';
@@ -64,7 +71,7 @@ export const ALLOWED_PARAMETER_TYPE = [
 
 /**
  * API 工具参数的验证模式
- * 定义了参数必须包含的字段和验证规则：
+ * 使用 Zod 定义了参数必须包含的字段和验证规则：
  * - name: 参数名称（非空字符串）
  * - in: 参数位置（必须是允许的位置之一）
  * - description: 参数描述（非空字符串）
@@ -97,7 +104,7 @@ export type ApiToolParameter = z.infer<typeof parameterSchema>;
 
 /**
  * OpenAPI 规范的验证模式
- * 定义了 OpenAPI 文档必须包含的字段和验证规则：
+ * 使用 Zod 定义了 OpenAPI 文档必须包含的字段和验证规则：
  * - server: 服务器 URL（必须是合法的 URL）
  * - description: API 描述（非空字符串）
  * - paths: API 路径定义（包含方法、描述、操作 ID 和参数）
@@ -135,3 +142,47 @@ export const openapiSchema = z.object({
  * 基于 openapiSchema 的类型推断
  */
 export type OpenapiSchema = z.infer<typeof openapiSchema>;
+
+/**
+ * 默认的文本处理规则
+ * 定义了文本预处理和分段的基本规则：
+ *
+ * 预处理规则：
+ * - remove_extra_space: 移除多余的空格
+ * - remove_url_and_email: 移除 URL 和邮箱地址
+ *
+ * 分段规则：
+ * - 使用多种分隔符进行文本分段，包括：
+ *   - 段落分隔（\n\n）
+ *   - 行分隔（\n）
+ *   - 中文标点（。！？）
+ *   - 英文标点（.!?）
+ *   - 分号（；;）
+ *   - 逗号（，,）
+ *   - 空格
+ * - 每个分块大小为 500 字符
+ * - 分块重叠 50 字符，以保持上下文连贯性
+ */
+export const DEFAULT_PROCESS_RULE = {
+  mode: 'custom',
+  rule: {
+    pre_process_rules: [
+      { id: 'remove_extra_space', enabled: true },
+      { id: 'remove_url_and_email', enabled: true },
+    ],
+    segment: {
+      separators: [
+        '\n\n',
+        '\n',
+        '。|！|？',
+        '.s|!s|?s', // 英文标点符号后面通常需要加空格
+        '；|;s',
+        '，|,s',
+        ' ',
+        '',
+      ],
+      chunk_size: 500,
+      chunk_overlap: 50,
+    },
+  },
+};

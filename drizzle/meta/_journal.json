@@ -50,6 +50,13 @@
       "when": 1748529135768,
       "tag": "0006_luxuriant_wrecker",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1748621551393,
+      "tag": "0007_fine_scalphunter",
+      "breakpoints": true
     }
   ]
 }

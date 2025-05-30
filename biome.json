@@ -12,7 +12,8 @@
       "**/node_modules/**",
       "**/.next/**",
       "**/components/ui/**",
-      "**/generated/**"
+      "**/generated/**",
+      "**/dist/**"
     ]
   },
   "formatter": {

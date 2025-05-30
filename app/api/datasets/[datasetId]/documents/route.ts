@@ -1,14 +1,28 @@
 /**
- * 文档列表 API 路由处理模块
- * 该模块提供了获取指定知识库下文档列表的 API 接口
- * 支持文档名称的模糊搜索和分页功能
+ * 文档管理 API 路由处理模块
+ *
+ * 该模块提供了知识库文档管理的核心 API 接口，包括：
+ * 1. 获取文档列表：支持按文档名称进行模糊搜索和分页查询
+ * 2. 创建新文档：支持批量上传文档（最多10份），并提供自动和自定义两种处理模式
+ *
+ * 文档处理流程：
+ * - 文档创建后进入异步处理流程
+ * - 处理状态包括：等待中、解析中、分割中、索引构建中、完成、错误等
+ * - 支持文档的启用/禁用管理
+ *
+ * 安全特性：
+ * - 所有接口都需要通过 API Key 进行身份验证
+ * - 严格的数据验证和错误处理机制
  */
 
 import { verifyApiKey } from '@/lib/auth/dal';
 import { loadSearchPageReqParams } from '@/lib/paginator';
 import { handleRouteError, successResult } from '@/lib/route-common';
-import { getDocumentListReqSchema } from '@/schemas/document-schema';
-import { getDocumentListByPage } from '@/services/document';
+import {
+  createDocumentReqSchema,
+  getDocumentListReqSchema,
+} from '@/schemas/document-schema';
+import { createDocuments, getDocumentListByPage } from '@/services/document';
 
 // 定义路由参数类型
 type Params = { params: Promise<{ datasetId: string }> };
@@ -132,6 +146,123 @@ export async function GET(request: Request, { params }: Params) {
     );
     // 获取文档列表数据
     const result = await getDocumentListByPage(userId, datasetId, pageReq);
+    return successResult(result);
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}
+
+/**
+ * @swagger
+ * /api/datasets/{datasetId}/documents:
+ *   post:
+ *     tags:
+ *       - Documents
+ *     summary: 在指定知识库下新增文档
+ *     description: 该接口用于在指定的知识库下添加新文档，该接口后端的服务会长时间进行处理，所以在后端服务中，创建好基础的文档信息后接口就会响应前端，在前端关闭页面/接口不影响后端逻辑的执行，该接口一次性最多可以上传 10 份文档。
+ *     parameters:
+ *       - in: path
+ *         name: datasetId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: 需要添加文档的知识库 id，类型为 uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - uploadFileIds
+ *               - processType
+ *             properties:
+ *               uploadFileIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: uuid
+ *                 description: 需要新增到知识库中的文件id列表，最多支持上传 10 份文件
+ *               processType:
+ *                 type: string
+ *                 enum: [automatic, custom]
+ *                 description: 处理类型，支持 automatic(自动模式) 和 custom(自定义)
+ *               rule:
+ *                 type: object
+ *                 description: 当处理类型为 custom 时为必填参数
+ *                 properties:
+ *                   preProcessRules:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           enum: [remove_extra_space, remove_url_and_email]
+ *                           description: 预处理标识，支持 remove_extra_space(移除多余空格) 和 remove_url_and_email(移除链接和邮箱)
+ *                         enabled:
+ *                           type: boolean
+ *                           description: 对应的预处理是否开启
+ *                   segment:
+ *                     type: object
+ *                     properties:
+ *                       separators:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         description: 片段的分隔符列表，支持正则匹配
+ *                       chunkSize:
+ *                         type: integer
+ *                         description: 每个片段的最大 Token 数
+ *                       chunkOverlap:
+ *                         type: integer
+ *                         description: 每个片段之间的重叠度
+ *     responses:
+ *       200:
+ *         description: 创建成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     documents:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                             description: 创建的文档 id
+ *                           name:
+ *                             type: string
+ *                             description: 创建的文档名字
+ *                           status:
+ *                             type: string
+ *                             description: 当前文档的状态，涵盖 waiting(等待中)、parsing(解析处理中)、splitting(分割中)、indexing(构建索引中)、completed(构建完成)、error(出错) 等
+ *                           createdAt:
+ *                             type: integer
+ *                             description: 文档的创建时间戳
+ *                     batch:
+ *                       type: string
+ *                       description: 当前处理的批次标识，可以通过该批次来获取对应文档的处理信息
+ *                 message:
+ *                   type: string
+ *                   example: ""
+ */
+export async function POST(request: Request, { params }: Params) {
+  try {
+    const { userId } = await verifyApiKey();
+    const [{ datasetId }, data] = await Promise.all([params, request.json()]);
+    const req = createDocumentReqSchema.parse(data);
+    const result = await createDocuments(userId, datasetId, req);
     return successResult(result);
   } catch (error) {
     return handleRouteError(error);

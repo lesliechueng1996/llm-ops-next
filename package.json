@@ -11,7 +11,8 @@
     "auth:generate": "pnpm dlx @better-auth/cli generate",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "worker:dev": "tsc-watch --project tsconfig.worker.json --onSuccess \"node ./dist/worker.js\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -27,14 +28,17 @@
     "@radix-ui/react-slot": "^1.2.2",
     "@radix-ui/react-visually-hidden": "^1.2.2",
     "better-auth": "^1.2.8",
+    "bullmq": "^5.53.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cos-js-sdk-v5": "^1.10.1",
     "cos-nodejs-sdk-v5": "^2.14.7",
     "date-fns": "^4.1.0",
+    "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.1",
     "duck-duck-scrape": "^2.2.7",
     "embla-carousel-react": "^8.6.0",
+    "ioredis": "^5.6.1",
     "langchain": "^0.3.27",
     "lucide-react": "^0.511.0",
     "nanoid": "^5.1.5",
@@ -53,6 +57,7 @@
     "sonner": "^2.0.3",
     "swagger-ui-react": "^5.22.0",
     "tailwind-merge": "^3.3.0",
+    "tsc-watch": "^7.1.1",
     "usehooks-ts": "^3.1.1",
     "zod": "^3.24.4"
   },

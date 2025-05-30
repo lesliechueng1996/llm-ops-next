@@ -201,7 +201,7 @@ export const processRule = pgTable(
     datasetId: uuid('dataset_id')
       .notNull()
       .references(() => dataset.id, { onDelete: 'cascade' }),
-    model: text('model').notNull().default(''),
+    mode: text('mode').notNull().default(''),
     rule: jsonb('rule').notNull().default('{}'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at')

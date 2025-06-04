@@ -5,7 +5,7 @@
  * 从环境变量中读取数据库连接 URL。
  */
 
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { drizzle } from 'drizzle-orm/bun-sql';
 
 // 初始化数据库连接
 export const db = drizzle(process.env.DATABASE_URL || '');

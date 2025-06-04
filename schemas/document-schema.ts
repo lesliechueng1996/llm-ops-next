@@ -13,9 +13,9 @@
  * - 请求参数验证和转换
  */
 
+import { DEFAULT_PROCESS_RULE } from '@/lib/entity';
 import { z } from 'zod';
 import { searchPageReqSchema } from './common-schema';
-import { DEFAULT_PROCESS_RULE } from '@/lib/entity';
 
 /**
  * 获取文档列表的请求参数 Schema

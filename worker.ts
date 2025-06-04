@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { Worker } from 'bullmq';
-import { redisConnection } from './lib/redis';
 import { DOCUMENT_QUEUE_NAME } from './lib/queues/queue-name';
+import { redisConnection } from './lib/redis';
 
 const documentQueue = new Worker(
   DOCUMENT_QUEUE_NAME,

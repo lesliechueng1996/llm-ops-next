@@ -5,10 +5,10 @@
  * 通过 Redis 作为后端存储。主要用于批量处理文档的构建任务。
  */
 
-import { Queue } from 'bullmq';
 import { log } from '@/lib/logger';
 import { redisConnection } from '@/lib/redis';
-import { DOCUMENT_QUEUE_NAME, BUILD_DOCUMENTS_TASK_NAME } from './queue-name';
+import { Queue } from 'bullmq';
+import { BUILD_DOCUMENTS_TASK_NAME, DOCUMENT_QUEUE_NAME } from './queue-name';
 
 // 初始化文档处理队列
 const documentQueue = new Queue(DOCUMENT_QUEUE_NAME, {

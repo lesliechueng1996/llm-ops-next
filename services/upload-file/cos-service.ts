@@ -10,6 +10,7 @@
  * 5. 获取文件访问 URL
  */
 
+import { createWriteStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -18,6 +19,7 @@ import {
   InternalServerErrorException,
 } from '@/exceptions';
 import { ALLOWED_IMAGE_EXTENSIONS, ALLOWED_IMAGE_SIZE } from '@/lib/entity';
+import { withTempFile } from '@/lib/file-util';
 import { log } from '@/lib/logger';
 import COS from 'cos-nodejs-sdk-v5';
 import { format } from 'date-fns';
@@ -127,67 +129,60 @@ export const uploadFile = async (file: File) => {
   const ext = file.name.split('.').pop() ?? '';
   const fileKey = generateFileKey(ext);
 
-  let tempFilePath = '';
-  try {
-    tempFilePath = path.join(os.tmpdir(), fileKey);
+  return withTempFile(fileKey, async (tempFilePath) => {
+    try {
+      log.info('暂存文件到: %s', tempFilePath);
+      // 使用 ArrayBuffer 或 Blob 数据
+      const fileData = await file.arrayBuffer();
+      await fs.writeFile(tempFilePath, Buffer.from(fileData));
 
-    // 确保目录存在
-    const tempDir = path.dirname(tempFilePath);
-    await fs.mkdir(tempDir, { recursive: true });
+      // 对中文文件名进行编码处理
+      const encodedOriginalname = Buffer.from(file.name, 'latin1').toString(
+        'utf8',
+      );
 
-    log.info('暂存文件到: %s', tempFilePath);
-    // 使用 ArrayBuffer 或 Blob 数据
-    const fileData = await file.arrayBuffer();
-    await fs.writeFile(tempFilePath, Buffer.from(fileData));
-
-    // 对中文文件名进行编码处理
-    const encodedOriginalname = Buffer.from(file.name, 'latin1').toString(
-      'utf8',
-    );
-
-    const uploadPromise = new Promise<COS.UploadFileResult>(
-      (resolve, reject) => {
-        cos.uploadFile(
-          {
-            Bucket: process.env.TENCENT_COS_BUCKET ?? '',
-            Region: process.env.TENCENT_COS_REGION ?? '',
-            Key: fileKey,
-            FilePath: tempFilePath,
-            onProgress: (progressData) => {
-              log.info('上传进度: %d%', Math.floor(progressData.percent * 100));
+      const uploadPromise = new Promise<COS.UploadFileResult>(
+        (resolve, reject) => {
+          cos.uploadFile(
+            {
+              Bucket: process.env.TENCENT_COS_BUCKET ?? '',
+              Region: process.env.TENCENT_COS_REGION ?? '',
+              Key: fileKey,
+              FilePath: tempFilePath,
+              onProgress: (progressData) => {
+                log.info(
+                  '上传进度: %d%',
+                  Math.floor(progressData.percent * 100),
+                );
+              },
             },
-          },
-          (err, data) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(data);
-            }
-          },
-        );
-      },
-    );
+            (err, data) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(data);
+              }
+            },
+          );
+        },
+      );
 
-    const result = await uploadPromise;
-    log.info('上传文件成功');
+      const result = await uploadPromise;
+      log.info('上传文件成功');
 
-    return {
-      name: encodedOriginalname,
-      key: fileKey,
-      size: file.size,
-      extension: ext,
-      mimeType: file.type,
-      hash: result.ETag,
-    };
-  } catch (error) {
-    log.error('上传文件失败: %o', error);
-    throw new InternalServerErrorException('上传文件失败');
-  } finally {
-    if (tempFilePath) {
-      await fs.rm(tempFilePath);
-      log.info('删除临时文件: %s', tempFilePath);
+      return {
+        name: encodedOriginalname,
+        key: fileKey,
+        size: file.size,
+        extension: ext,
+        mimeType: file.type,
+        hash: result.ETag,
+      };
+    } catch (error) {
+      log.error('上传文件失败: %o', error);
+      throw new InternalServerErrorException('上传文件失败');
     }
-  }
+  });
 };
 
 /**
@@ -206,4 +201,34 @@ export const getFileUrl = async (key: string) => {
   }
 
   return `${domain}/${key}`;
+};
+
+/**
+ * 从腾讯云 COS 下载文件到本地
+ *
+ * @param key - 文件在 COS 中的存储路径
+ * @param filePath - 文件要保存到本地的路径
+ * @returns Promise 对象，成功时返回下载的文件数据
+ * @throws 当下载失败时抛出错误
+ */
+export const downloadFile = async (key: string, filePath: string) => {
+  const bucket = process.env.TENCENT_COS_BUCKET ?? '';
+  const region = process.env.TENCENT_COS_REGION ?? '';
+  return new Promise((resolve, reject) => {
+    cos.getObject(
+      {
+        Bucket: bucket,
+        Region: region,
+        Key: key,
+        Output: createWriteStream(filePath),
+      },
+      (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      },
+    );
+  });
 };

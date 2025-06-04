@@ -12,8 +12,7 @@
 
 import { createWriteStream } from 'node:fs';
 import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   InternalServerErrorException,
@@ -23,7 +22,6 @@ import { withTempFile } from '@/lib/file-util';
 import { log } from '@/lib/logger';
 import COS from 'cos-nodejs-sdk-v5';
 import { format } from 'date-fns';
-import { nanoid } from 'nanoid';
 import { getCredential } from 'qcloud-cos-sts';
 
 const cos = new COS({
@@ -40,7 +38,7 @@ const cos = new COS({
  */
 const generateFileKey = (ext: string) => {
   const date = format(new Date(), 'yyyyMMdd');
-  return `${date}/${nanoid()}.${ext}`;
+  return `${date}/${randomUUID()}.${ext}`;
 };
 
 /**

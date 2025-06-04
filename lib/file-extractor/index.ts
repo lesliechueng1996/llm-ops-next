@@ -13,7 +13,6 @@ import { log } from '@/lib/logger';
 import { downloadFile } from '@/services/upload-file/cos-service';
 import { CSVLoader } from '@langchain/community/document_loaders/fs/csv';
 import { DocxLoader } from '@langchain/community/document_loaders/fs/docx';
-import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
 import { PPTXLoader } from '@langchain/community/document_loaders/fs/pptx';
 import { UnstructuredLoader } from '@langchain/community/document_loaders/fs/unstructured';
 import type { DocumentLoader } from '@langchain/core/document_loaders/base';
@@ -27,7 +26,7 @@ import { TextLoader } from 'langchain/document_loaders/fs/text';
  * @param isUnstructured - 是否使用 UnstructuredLoader 处理未知格式，默认为 true
  * @returns 文档数组或文本内容
  */
-const loadFromFile = async (
+export const loadFromFile = async (
   filePath: string,
   returnText = false,
   isUnstructured = true,
@@ -44,14 +43,14 @@ const loadFromFile = async (
     });
   } else if (fileExtension === '.json') {
     loader = new JSONLoader(filePath);
-  } else if (fileExtension === '.pdf') {
-    loader = new PDFLoader(filePath);
   } else if (fileExtension === '.pptx') {
     loader = new PPTXLoader(filePath);
   } else if (!isUnstructured) {
     loader = new TextLoader(filePath);
   } else {
-    loader = new UnstructuredLoader(filePath);
+    loader = new UnstructuredLoader(filePath, {
+      apiUrl: 'http://127.0.0.1:8000/general/v0/general',
+    });
   }
 
   const docs = await loader.load();

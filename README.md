@@ -22,7 +22,7 @@
   - Swagger UI
   - next-swagger-doc
 - **代码规范**: Biome
-- **包管理**: pnpm
+- **包管理**: Bun
 - **对象存储**: 腾讯云 COS
 - **AI 集成**:
   - LangChain
@@ -104,7 +104,7 @@
 ### 前置要求
 
 - Node.js (推荐最新 LTS 版本)
-- pnpm
+- Bun
 - PostgreSQL
 
 ### 安装
@@ -117,7 +117,7 @@ cd llm-ops-next
 
 2. 安装依赖
 ```bash
-pnpm install
+bun install
 ```
 
 3. 环境配置
@@ -125,26 +125,26 @@ pnpm install
 
 4. 数据库迁移
 ```bash
-pnpm db:generate
-pnpm db:push
+bun run db:generate
+bun run db:push
 ```
 
 ### 开发
 
 ```bash
-pnpm dev
+bun run dev
 ```
 
 ### 构建
 
 ```bash
-pnpm build
+bun run build
 ```
 
 ### 生产环境运行
 
 ```bash
-pnpm start
+bun run start
 ```
 
 ## 项目结构
@@ -162,12 +162,12 @@ pnpm start
 
 ## 开发命令
 
-- `pnpm dev` - 启动开发服务器
-- `pnpm build` - 构建生产版本
-- `pnpm start` - 运行生产版本
-- `pnpm lint` - 运行代码检查
-- `pnpm lint:fix` - 自动修复代码问题
-- `pnpm db:push` - 更新数据库架构
-- `pnpm db:generate` - 生成数据库迁移文件
-- `pnpm db:migrate` - 执行数据库迁移
+- `bun run dev` - 启动开发服务器
+- `bun run build` - 构建生产版本
+- `bun run start` - 运行生产版本
+- `bun run lint` - 运行代码检查
+- `bun run lint:fix` - 自动修复代码问题
+- `bun run db:push` - 更新数据库架构
+- `bun run db:generate` - 生成数据库迁移文件
+- `bun run db:migrate` - 执行数据库迁移
 

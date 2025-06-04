@@ -12,7 +12,6 @@
 
 import { createWriteStream } from 'node:fs';
 import fs from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   InternalServerErrorException,
@@ -20,6 +19,7 @@ import {
 import { ALLOWED_IMAGE_EXTENSIONS, ALLOWED_IMAGE_SIZE } from '@/lib/entity';
 import { withTempFile } from '@/lib/file-util';
 import { log } from '@/lib/logger';
+import { randomUUIDv7 } from 'bun';
 import COS from 'cos-nodejs-sdk-v5';
 import { format } from 'date-fns';
 import { getCredential } from 'qcloud-cos-sts';
@@ -38,7 +38,7 @@ const cos = new COS({
  */
 const generateFileKey = (ext: string) => {
   const date = format(new Date(), 'yyyyMMdd');
-  return `${date}/${randomUUID()}.${ext}`;
+  return `${date}/${randomUUIDv7()}.${ext}`;
 };
 
 /**

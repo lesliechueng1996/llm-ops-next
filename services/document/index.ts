@@ -22,9 +22,9 @@ import { calculatePagination, paginationResult } from '@/lib/paginator';
 import { buildDocumentsAyncTask } from '@/lib/queues/document-queue';
 import type { SearchPageReq } from '@/schemas/common-schema';
 import type { CreateDocumentReq } from '@/schemas/document-schema';
+import { randomUUIDv7 } from 'bun';
 import { format } from 'date-fns';
 import { and, count, desc, eq, inArray, like, max, sql } from 'drizzle-orm';
-import { randomUUID } from 'node:crypto';
 
 /**
  * 分页获取文档列表
@@ -163,7 +163,7 @@ export const createDocuments = async (
   }
 
   // 生成批次ID，用于跟踪同一批次的文档
-  const batchId = `${format(new Date(), 'yyyyMMddHHmmss')}-${randomUUID()}`;
+  const batchId = `${format(new Date(), 'yyyyMMddHHmmss')}-${randomUUIDv7()}`;
 
   // 获取当前最大位置值，用于新文档的位置排序
   const lastDocumentPosition = await db

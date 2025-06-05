@@ -59,6 +59,7 @@
     "sonner": "^2.0.3",
     "swagger-ui-react": "^5.22.0",
     "tailwind-merge": "^3.3.0",
+    "tiktoken": "^1.0.21",
     "tsc-watch": "^7.1.1",
     "usehooks-ts": "^3.1.1",
     "word-extractor": "^1.0.4",

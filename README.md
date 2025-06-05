@@ -27,6 +27,8 @@
 - **AI 集成**:
   - LangChain
   - OpenAI
+  - Alibaba 通义千问（嵌入模型）
+  - Weaviate（向量数据库）
 
 ## 功能特性
 
@@ -44,6 +46,9 @@
   - 文档异步处理
   - 文档队列管理
   - 文档处理状态追踪
+  - 关键词自动抽取（基于 nodejieba）
+  - 支持 Weaviate 向量存储与检索
+  - 文本分割与清洗（可自定义分隔符/分块/重叠）
 - 内置工具集成
   - 天气查询
   - IP 地址查询
@@ -83,6 +88,7 @@
   - `/api/datasets/:datasetId` - 获取、更新和删除特定知识库
   - `/api/datasets/:datasetId/documents` - 获取知识库下的文档列表，支持文档名称模糊搜索和分页
   - `/api/datasets/:datasetId/queries` - 获取知识库最近的查询记录列表（最近10条）
+  - `/api/datasets/:datasetId/hit` - 知识库召回测试，支持 full_text/semantic/hybrid 检索
 
 - `/api/upload-files` - 文件上传相关接口
   - `/api/upload-files/file` - 文件上传
@@ -123,6 +129,12 @@ bun install
 3. 环境配置
 创建 `.env` 文件并配置必要的环境变量。
 
+**主要环境变量示例：**
+- `WEAVIATE_HOST`/`WEAVIATE_PORT`：Weaviate 服务地址与端口
+- `REDIS_HOST`/`REDIS_PORT`/`REDIS_DB`/`REDIS_QUEUE_DB`：Redis 配置
+- `ALIYUN_TONGYI_API_KEY`：阿里云通义千问 API Key（用于嵌入）
+- 其他见 `.env.example`
+
 4. 数据库迁移
 ```bash
 bun run db:generate
@@ -154,6 +166,11 @@ bun run start
 ├── app/            # Next.js 应用路由
 ├── components/     # React 组件
 ├── lib/           # 工具函数和配置
+│   ├── embedding/         # 嵌入与缓存模块（阿里云+Redis）
+│   ├── vector-store/      # Weaviate 向量存储集成
+│   ├── keyword/           # 关键词抽取模块
+│   ├── text-splitter/     # 文本分割与清洗
+│   └── ...
 ├── public/        # 静态资源
 ├── schemas/       # 数据模型和验证
 ├── services/      # 业务逻辑服务

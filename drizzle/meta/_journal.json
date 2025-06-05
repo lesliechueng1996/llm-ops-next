@@ -57,6 +57,20 @@
       "when": 1748621551393,
       "tag": "0007_fine_scalphunter",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1749128610579,
+      "tag": "0008_public_drax",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1749138953349,
+      "tag": "0009_little_starbolt",
+      "breakpoints": true
     }
   ]
 }

@@ -300,6 +300,7 @@ export const segment = pgTable(
       table.datasetId,
       table.documentId,
     ),
+    unique('uq_segment_node_id').on(table.nodeId),
   ],
 );
 
@@ -310,7 +311,7 @@ export const keywordTable = pgTable(
     datasetId: uuid('dataset_id')
       .notNull()
       .references(() => dataset.id, { onDelete: 'cascade' }),
-    keywords: jsonb('keywords').notNull().default('[]'),
+    keywords: jsonb('keywords').notNull().default('{}'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at')
       .notNull()

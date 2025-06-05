@@ -192,3 +192,47 @@ export const DEFAULT_PROCESS_RULE = {
     },
   },
 };
+
+/**
+ * 文档处理状态枚举
+ * 定义了文档在整个处理流程中可能处于的各种状态：
+ * - WAITING: 等待处理，文档已上传但尚未开始处理
+ * - PARSING: 正在解析，系统正在解析文档内容
+ * - SPLITTING: 正在分段，系统正在将文档分割成更小的片段
+ * - INDEXING: 正在索引，系统正在为文档建立索引
+ * - COMPLETED: 处理完成，文档已成功处理完成
+ * - ERROR: 处理错误，文档处理过程中发生错误
+ */
+export enum DocumentStatus {
+  /** 等待处理状态 */
+  WAITING = 'waiting',
+  /** 正在解析状态 */
+  PARSING = 'parsing',
+  /** 正在分段状态 */
+  SPLITTING = 'splitting',
+  /** 正在索引状态 */
+  INDEXING = 'indexing',
+  /** 处理完成状态 */
+  COMPLETED = 'completed',
+  /** 处理错误状态 */
+  ERROR = 'error',
+}
+
+/**
+ * 文档片段处理状态枚举
+ * 定义了文档片段在处理过程中可能处于的各种状态：
+ * - WAITING: 等待处理，片段已创建但尚未开始处理
+ * - INDEXING: 正在索引，系统正在为片段建立索引
+ * - COMPLETED: 处理完成，片段已成功处理完成
+ * - ERROR: 处理错误，片段处理过程中发生错误
+ */
+export enum SegmentStatus {
+  /** 等待处理状态 */
+  WAITING = 'waiting',
+  /** 正在索引状态 */
+  INDEXING = 'indexing',
+  /** 处理完成状态 */
+  COMPLETED = 'completed',
+  /** 处理错误状态 */
+  ERROR = 'error',
+}

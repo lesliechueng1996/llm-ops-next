@@ -51,3 +51,22 @@ export const withTempFile = async <T>(
     }
   }
 };
+
+/**
+ * 使用 SHA-256 算法计算文本的哈希值
+ *
+ * @param text - 需要计算哈希值的文本内容
+ * @returns string - 返回文本的 SHA-256 哈希值（十六进制字符串）
+ *
+ * @example
+ * ```typescript
+ * const hash = hashText('Hello World');
+ * console.log(hash); // 输出: a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e
+ * ```
+ */
+export const hashText = (text: string) => {
+  // 创建 SHA-256 哈希器实例
+  const hasher = new Bun.CryptoHasher('sha256');
+  // 更新哈希器内容并返回十六进制格式的哈希值
+  return hasher.update(text).digest('hex');
+};

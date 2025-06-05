@@ -18,6 +18,7 @@ import {
   segment,
   uploadFile,
 } from '@/lib/db/schema';
+import { DocumentStatus } from '@/lib/entity';
 import { calculatePagination, paginationResult } from '@/lib/paginator';
 import { buildDocumentsAyncTask } from '@/lib/queues/document-queue';
 import type { SearchPageReq } from '@/schemas/common-schema';
@@ -196,6 +197,7 @@ export const createDocuments = async (
             datasetId,
             uploadFileId: record.id,
             processRuleId: processRuleRecord[0].id,
+            status: DocumentStatus.WAITING,
             batch: batchId,
             name: record.name,
             position: lastPosition,

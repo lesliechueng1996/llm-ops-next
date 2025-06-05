@@ -1,0 +1,1 @@
+ALTER TABLE "keyword_table" ALTER COLUMN "keywords" SET DEFAULT '{}';

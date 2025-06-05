@@ -1,0 +1,1 @@
+ALTER TABLE "segment" ADD CONSTRAINT "uq_segment_node_id" UNIQUE("node_id");

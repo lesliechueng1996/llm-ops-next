@@ -49,7 +49,7 @@ export const loadFromFile = async (
     loader = new TextLoader(filePath);
   } else {
     loader = new UnstructuredLoader(filePath, {
-      apiUrl: 'http://127.0.0.1:8000/general/v0/general',
+      apiUrl: process.env.UNSTRUCTURED_API_URL,
     });
   }
 

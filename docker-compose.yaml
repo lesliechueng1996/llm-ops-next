@@ -1,0 +1,28 @@
+services:
+  weaviate:
+    image: cr.weaviate.io/semitechnologies/weaviate:1.31.0
+    container_name: llm-ops-next-weaviate
+    ports:
+      - "50051:50051"
+      - "8080:8080"
+    volumes:
+      - ./data/weaviate:/app/data
+    environment:
+      - PERSISTENCE_DATA_PATH=/app/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: llm-ops-next-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    restart: unless-stopped
+
+  unstructured-api:
+    image: robwilkes/unstructured-api:latest
+    container_name: llm-ops-next-unstructured-api
+    ports:
+      - "8000:8000"
+    restart: unless-stopped

@@ -10,10 +10,10 @@
  * 所有函数都是纯函数，不依赖外部状态。
  */
 
+import { log } from '@/lib/logger';
 import { type ClassValue, clsx } from 'clsx';
 import type { KeyboardEventHandler } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { log } from '@/lib/logger';
 
 /**
  * 智能合并类名

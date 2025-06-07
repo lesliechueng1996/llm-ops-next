@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'bun:test';
 import { vectorStoreCollection } from '@/lib/vector-store';
-import { describe, it, expect } from 'bun:test';
 
 describe('vectorStore', () => {
   it('should get collection', async () => {

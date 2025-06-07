@@ -1,10 +1,10 @@
+import { cacheBackedEmbeddings } from '@/lib/embedding';
+import { WeaviateStore } from '@langchain/weaviate';
 /**
  * 本模块用于初始化和导出 Weaviate 向量存储相关的工具，包括向量存储实例、检索器和集合操作方法。
  * 依赖 weaviate-client 和 @langchain/weaviate。
  */
 import weaviate from 'weaviate-client';
-import { WeaviateStore } from '@langchain/weaviate';
-import { cacheBackedEmbeddings } from '@/lib/embedding';
 
 /**
  * Weaviate 集合名称，所有数据将存储于此集合中。

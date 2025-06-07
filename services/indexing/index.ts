@@ -15,7 +15,6 @@
  * - 并发控制：使用自定义并发任务管理器
  */
 
-import { log } from '@/lib/logger';
 import { db } from '@/lib/db';
 import {
   document,
@@ -24,24 +23,25 @@ import {
   segment,
   uploadFile,
 } from '@/lib/db/schema';
-import { inArray, and, eq, max } from 'drizzle-orm';
+import { calculateTokenCount } from '@/lib/embedding';
+import { DocumentStatus, SegmentStatus } from '@/lib/entity';
+import { load } from '@/lib/file-extractor';
+import { hashText } from '@/lib/file-util';
+import { extractKeywords } from '@/lib/keyword';
+import { log } from '@/lib/logger';
+import { releaseLock } from '@/lib/redis/lock';
+import { cleanText, createTextSplitter } from '@/lib/text-splitter';
+import { concurrencyTask } from '@/lib/utils';
+import { vectorStore, vectorStoreCollection } from '@/lib/vector-store';
 import {
   addKeywordTableFromSegmentIds,
   buildKeywordMap,
   deleteKeywordTableFromSegmentIds,
   getOrCreateKeywordTable,
 } from '@/services/keyword-table';
-import { DocumentStatus, SegmentStatus } from '@/lib/entity';
-import { load } from '@/lib/file-extractor';
 import type { Document } from '@langchain/core/documents';
-import { createTextSplitter, cleanText } from '@/lib/text-splitter';
-import { calculateTokenCount } from '@/lib/embedding';
 import { randomUUIDv7 } from 'bun';
-import { hashText } from '@/lib/file-util';
-import { extractKeywords } from '@/lib/keyword';
-import { concurrencyTask } from '@/lib/utils';
-import { vectorStore, vectorStoreCollection } from '@/lib/vector-store';
-import { releaseLock } from '@/lib/redis/lock';
+import { and, eq, inArray, max } from 'drizzle-orm';
 
 /**
  * 构建文档索引

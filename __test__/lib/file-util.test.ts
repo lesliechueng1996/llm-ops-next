@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'bun:test';
 import { hashText } from '@/lib/file-util';
-import { describe, it, expect } from 'bun:test';
 
 describe('fileUtil', () => {
   it('should hash text', () => {

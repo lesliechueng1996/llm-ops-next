@@ -263,7 +263,7 @@ export async function POST(request: Request, { params }: Params) {
     const [{ datasetId }, data] = await Promise.all([params, request.json()]);
     const req = createDocumentReqSchema.parse(data);
     const result = await createDocuments(userId, datasetId, req);
-    return successResult(result);
+    return successResult(result, 201, '创建成功');
   } catch (error) {
     return handleRouteError(error);
   }

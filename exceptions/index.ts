@@ -110,3 +110,19 @@ export class InternalServerErrorException extends BaseException {
     super(500, message, 'INTERNAL_SERVER_ERROR');
   }
 }
+
+/**
+ * 409 Conflict 异常
+ * 用于表示请求与服务器当前状态冲突的情况，例如资源版本冲突、并发修改等
+ *
+ * @class ConflictException
+ * @extends BaseException
+ */
+export class ConflictException extends BaseException {
+  /**
+   * @param {string} [message='Conflict'] - 错误消息
+   */
+  constructor(message = 'Conflict') {
+    super(409, message, 'CONFLICT');
+  }
+}

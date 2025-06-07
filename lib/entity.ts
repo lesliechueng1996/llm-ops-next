@@ -6,12 +6,18 @@
  * 2. API 工具参数的类型定义和验证
  * 3. OpenAPI 规范的类型定义和验证
  * 4. 文本处理规则的定义
+ * 5. 文档处理状态的定义
+ * 6. 分布式锁的键定义
  *
  * 主要组件：
  * - 图片上传配置：定义允许的图片格式和大小限制
  * - API 参数验证：使用 Zod 定义参数验证规则
  * - OpenAPI 规范：定义 API 文档的结构和验证规则
  * - 文本处理规则：定义默认的文本预处理和分段规则
+ * - 文档状态：定义文档处理流程中的各种状态
+ * - 分布式锁：定义用于并发控制的锁键
+ *
+ * @module entity
  */
 
 import { z } from 'zod';
@@ -20,6 +26,9 @@ import { z } from 'zod';
  * 允许上传的图片文件扩展名列表
  * 支持的格式包括：PNG、JPG、JPEG、GIF、WEBP、SVG
  * 这些格式都是常见的网页图片格式，具有良好的浏览器兼容性
+ *
+ * @constant
+ * @type {string[]}
  */
 export const ALLOWED_IMAGE_EXTENSIONS = [
   'png',
@@ -34,6 +43,9 @@ export const ALLOWED_IMAGE_EXTENSIONS = [
  * 允许上传的图片文件大小限制
  * 设置为 5MB (5 * 1024 * 1024 字节)
  * 这个限制可以防止过大的文件上传，保护服务器资源
+ *
+ * @constant
+ * @type {number}
  */
 export const ALLOWED_IMAGE_SIZE = 1024 * 1024 * 5;
 
@@ -41,6 +53,9 @@ export const ALLOWED_IMAGE_SIZE = 1024 * 1024 * 5;
  * 允许的 HTTP 方法列表
  * 包括：GET、POST、PUT、DELETE、PATCH
  * 这些是 RESTful API 中最常用的 HTTP 方法
+ *
+ * @constant
+ * @type {readonly string[]}
  */
 const ALLOWED_METHODS = ['get', 'post', 'put', 'delete', 'patch'] as const;
 
@@ -202,6 +217,8 @@ export const DEFAULT_PROCESS_RULE = {
  * - INDEXING: 正在索引，系统正在为文档建立索引
  * - COMPLETED: 处理完成，文档已成功处理完成
  * - ERROR: 处理错误，文档处理过程中发生错误
+ *
+ * @enum {string}
  */
 export enum DocumentStatus {
   /** 等待处理状态 */
@@ -225,6 +242,8 @@ export enum DocumentStatus {
  * - INDEXING: 正在索引，系统正在为片段建立索引
  * - COMPLETED: 处理完成，片段已成功处理完成
  * - ERROR: 处理错误，片段处理过程中发生错误
+ *
+ * @enum {string}
  */
 export enum SegmentStatus {
   /** 等待处理状态 */
@@ -236,3 +255,25 @@ export enum SegmentStatus {
   /** 处理错误状态 */
   ERROR = 'error',
 }
+
+/**
+ * 文档更新锁的键模板
+ * 用于在更新文档时防止并发操作
+ * 格式：lock:document:update:enabled_{document_id}
+ *
+ * @constant
+ * @type {string}
+ */
+export const LOCK_DOCUMENT_UPDATE_ENABLED =
+  'lock:document:update:enabled_{document_id}';
+
+/**
+ * 关键词表更新锁的键模板
+ * 用于在更新数据集的关键词表时防止并发操作
+ * 格式：lock:keyword_table:update:keyword_table_{dataset_id}
+ *
+ * @constant
+ * @type {string}
+ */
+export const LOCK_KEYWORD_TABLE_UPDATE_KEYWORD_TABLE =
+  'lock:keyword_table:update:keyword_table_{dataset_id}';

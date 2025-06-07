@@ -11,6 +11,8 @@
  * - 数据库操作：使用 Drizzle ORM
  * - 向量存储：使用向量数据库存储文档片段
  * - 文本处理：使用 LangChain 进行文档处理
+ * - 关键词提取：使用自定义关键词提取算法
+ * - 并发控制：使用自定义并发任务管理器
  */
 
 import { log } from '@/lib/logger';
@@ -23,7 +25,12 @@ import {
   uploadFile,
 } from '@/lib/db/schema';
 import { inArray, and, eq, max } from 'drizzle-orm';
-import { getOrCreateKeywordTable } from '@/services/keyword-table';
+import {
+  addKeywordTableFromSegmentIds,
+  buildKeywordMap,
+  deleteKeywordTableFromSegmentIds,
+  getOrCreateKeywordTable,
+} from '@/services/keyword-table';
 import { DocumentStatus, SegmentStatus } from '@/lib/entity';
 import { load } from '@/lib/file-extractor';
 import type { Document } from '@langchain/core/documents';
@@ -33,17 +40,23 @@ import { randomUUIDv7 } from 'bun';
 import { hashText } from '@/lib/file-util';
 import { extractKeywords } from '@/lib/keyword';
 import { concurrencyTask } from '@/lib/utils';
-import { vectorStore } from '@/lib/vector-store';
+import { vectorStore, vectorStoreCollection } from '@/lib/vector-store';
+import { releaseLock } from '@/lib/redis/lock';
 
 /**
  * 构建文档索引
  *
  * 该函数是文档索引流程的入口点，负责协调整个文档处理流程。
  * 它会按顺序执行以下步骤：
- * 1. 解析文档
- * 2. 分割文档
- * 3. 创建索引
- * 4. 存储文档
+ * 1. 解析文档：从原始文件中提取文本内容
+ * 2. 分割文档：将文档分割成更小的片段
+ * 3. 创建索引：为文档片段创建关键词索引
+ * 4. 存储文档：将处理后的文档片段存储到向量数据库中
+ *
+ * 错误处理：
+ * - 如果处理过程中出现错误，会将文档状态更新为 ERROR
+ * - 错误信息会被记录到文档记录中
+ * - 每个文档的处理是独立的，一个文档的错误不会影响其他文档
  *
  * @param documentIds - 需要处理的文档ID数组
  * @param datasetId - 数据集ID
@@ -122,8 +135,16 @@ export const buildDocuments = async (
  * 从上传的文件中提取文本内容，并进行基本的清理。
  * 更新文档状态为解析完成，并记录字符数。
  *
+ * 处理流程：
+ * 1. 获取上传文件记录
+ * 2. 使用文件提取器加载文档内容
+ * 3. 清理文本内容
+ * 4. 计算字符数
+ * 5. 更新文档状态
+ *
  * @param doc - 文档记录
  * @returns 解析后的 LangChain 文档数组
+ * @throws 如果上传文件不存在
  */
 const parsingDocument = async (doc: typeof document.$inferSelect) => {
   log.info('Start parsing document %s', doc.id);
@@ -176,9 +197,18 @@ const parsingDocument = async (doc: typeof document.$inferSelect) => {
  * 根据处理规则将文档分割成更小的片段。
  * 为每个片段生成唯一ID，计算token数量，并更新数据库。
  *
+ * 处理流程：
+ * 1. 获取处理规则
+ * 2. 创建文本分割器
+ * 3. 清理文本内容
+ * 4. 分割文档
+ * 5. 生成片段记录
+ * 6. 更新数据库
+ *
  * @param doc - 文档记录
  * @param langchainDocs - LangChain 文档数组
  * @returns 分割后的 LangChain 文档片段数组
+ * @throws 如果处理规则不存在
  */
 const splittingDocument = async (
   doc: typeof document.$inferSelect,
@@ -297,6 +327,13 @@ const splittingDocument = async (
  * 为文档片段创建关键词索引，并更新关键词表。
  * 同时更新文档和片段的状态。
  *
+ * 处理流程：
+ * 1. 初始化关键词映射
+ * 2. 处理每个文档片段
+ * 3. 提取关键词
+ * 4. 更新片段状态
+ * 5. 更新关键词表
+ *
  * @param doc - 文档记录
  * @param langchainSegments - LangChain 文档片段数组
  * @param keywordTableRecord - 关键词表记录
@@ -308,18 +345,7 @@ const indexingDocument = async (
 ) => {
   log.info('Start indexing document %s', doc.id);
   // 初始化关键词映射，用于存储关键词和对应的片段ID
-  const keywordMapping: Record<string, Set<string>> = {};
-  const keywords = keywordTableRecord.keywords as Record<string, string[]>;
-  // 加载现有的关键词映射
-  for (const keywordKey of Object.keys(keywords)) {
-    const keywordValues = keywords[keywordKey];
-    if (!keywordMapping[keywordKey]) {
-      keywordMapping[keywordKey] = new Set();
-    }
-    for (const keywordValue of keywordValues) {
-      keywordMapping[keywordKey].add(keywordValue);
-    }
-  }
+  const keywordMapping = buildKeywordMap(keywordTableRecord);
 
   // 处理每个文档片段，提取关键词并更新索引
   for (const langchainSegment of langchainSegments) {
@@ -337,10 +363,12 @@ const indexingDocument = async (
 
     // 更新关键词映射，建立关键词和片段的关联
     for (const segmentKeyword of segmentKeywords) {
-      if (!keywordMapping[segmentKeyword]) {
-        keywordMapping[segmentKeyword] = new Set();
+      if (!keywordMapping.has(segmentKeyword)) {
+        keywordMapping.set(segmentKeyword, new Set());
       }
-      keywordMapping[segmentKeyword].add(langchainSegment.metadata.segment_id);
+      keywordMapping
+        .get(segmentKeyword)
+        ?.add(langchainSegment.metadata.segment_id);
     }
   }
 
@@ -373,6 +401,17 @@ const indexingDocument = async (
  *
  * 将处理完成的文档片段存储到向量数据库中。
  * 使用并发任务处理批量存储，并更新文档和片段的状态。
+ *
+ * 处理流程：
+ * 1. 启用文档和片段
+ * 2. 使用并发任务处理批量存储
+ * 3. 更新片段状态
+ * 4. 更新文档状态
+ *
+ * 性能优化：
+ * - 使用并发任务处理批量存储
+ * - 限制并发数为10
+ * - 批量更新数据库
  *
  * @param doc - 文档记录
  * @param langchainSegments - LangChain 文档片段数组
@@ -431,6 +470,10 @@ const savingDocument = async (
  * 清理文本中的特殊字符
  *
  * 移除文本中的控制字符和特殊标记，确保文本格式的一致性。
+ * 处理以下类型的字符：
+ * - 特殊标记（如 <| 和 |>）
+ * - 控制字符（ASCII 0-31，除了制表符和换行符）
+ * - 特殊Unicode字符
  *
  * @param text - 需要清理的文本
  * @returns 清理后的文本
@@ -446,4 +489,123 @@ const cleanExtraText = (text: string) => {
   // 清理特殊Unicode字符
   result = result.replace(/\uFFFE/g, '');
   return result;
+};
+
+/**
+ * 更新文档启用状态
+ *
+ * 更新文档及其相关片段的启用状态，同时更新向量数据库中的元数据。
+ * 处理流程：
+ * 1. 验证文档状态
+ * 2. 更新向量数据库中的元数据
+ * 3. 更新关键词表
+ * 4. 释放锁
+ *
+ * 错误处理：
+ * - 如果更新向量数据库失败，会将片段状态更新为 ERROR
+ * - 确保在任何情况下都会释放锁
+ *
+ * @param documentId - 文档ID
+ * @param enabled - 是否启用
+ * @param lockKey - 锁的键
+ * @param lockValue - 锁的值
+ */
+export const updateDocumentEnabled = async (
+  documentId: string,
+  enabled: boolean,
+  lockKey: string,
+  lockValue: string,
+) => {
+  try {
+    const docs = await db
+      .select()
+      .from(document)
+      .where(eq(document.id, documentId));
+
+    if (docs.length === 0) {
+      log.error('Document %s not found', documentId);
+      return;
+    }
+
+    const doc = docs[0];
+    if (doc.enabled !== enabled) {
+      log.warn(
+        'Document %s enabled state does not match, enabled: %o',
+        documentId,
+        enabled,
+      );
+      return;
+    }
+
+    const segmentRecords = await db
+      .select({
+        id: segment.id,
+        nodeId: segment.nodeId,
+        enabled: segment.enabled,
+      })
+      .from(segment)
+      .where(
+        and(
+          eq(segment.documentId, documentId),
+          eq(segment.status, SegmentStatus.COMPLETED),
+        ),
+      );
+
+    const nodeIds = segmentRecords.map((item) => item.nodeId);
+    const segmentIds = segmentRecords.map((item) => item.id);
+
+    const collection = vectorStoreCollection();
+    for (let i = 0; i < nodeIds.length; i++) {
+      const nodeId = nodeIds[i];
+      if (!nodeId) {
+        log.warn('Segment %s nodeId is empty', segmentRecords[i].id);
+        continue;
+      }
+      try {
+        await collection.data.update({
+          id: nodeId,
+          properties: {
+            document_enabled: enabled,
+          },
+        });
+      } catch (err) {
+        log.error(
+          'Update segment enabled state failed, nodeId: %s, error: %o',
+          nodeId,
+          err,
+        );
+        await db
+          .update(segment)
+          .set({
+            error: err instanceof Error ? err.message : JSON.stringify(err),
+            status: SegmentStatus.ERROR,
+            enabled: false,
+            disabledAt: new Date(),
+            stoppedAt: new Date(),
+          })
+          .where(eq(segment.nodeId, nodeId));
+      }
+    }
+
+    if (enabled) {
+      const enabledSegmentRecords = await db
+        .select({ id: segment.id })
+        .from(segment)
+        .where(
+          and(
+            eq(segment.documentId, documentId),
+            eq(segment.status, SegmentStatus.COMPLETED),
+            eq(segment.enabled, true),
+          ),
+        );
+
+      const enabledSegmentIds = enabledSegmentRecords.map((item) => item.id);
+      await addKeywordTableFromSegmentIds(doc.datasetId, enabledSegmentIds);
+    } else {
+      await deleteKeywordTableFromSegmentIds(doc.datasetId, segmentIds);
+    }
+  } catch (error) {
+  } finally {
+    await releaseLock(lockKey, lockValue);
+  }
 };

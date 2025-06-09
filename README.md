@@ -76,6 +76,8 @@
 - `/api/openapi` - OpenAPI 相关接口
   - `/api/openapi/chat` - 聊天功能接口
   - `/api/openapi/api-keys` - API 密钥管理
+  - `/api/openapi/api-keys/:id` - 管理特定 API 密钥
+  - `/api/openapi/api-keys/:id/is-active` - 更新 API 密钥激活状态
 
 - `/api/api-tools` - API 工具管理接口
   - `/api/api-tools` - API 工具列表
@@ -87,6 +89,10 @@
   - `/api/datasets` - 创建知识库和获取知识库列表
   - `/api/datasets/:datasetId` - 获取、更新和删除特定知识库
   - `/api/datasets/:datasetId/documents` - 获取知识库下的文档列表，支持文档名称模糊搜索和分页
+  - `/api/datasets/:datasetId/documents/:documentId` - 获取特定文档的详细信息
+  - `/api/datasets/:datasetId/documents/:documentId/name` - 更新文档名称
+  - `/api/datasets/:datasetId/documents/:documentId/enabled` - 更新文档启用状态
+  - `/api/datasets/:datasetId/documents/batch/:batchId` - 查询文档批处理进度
   - `/api/datasets/:datasetId/queries` - 获取知识库最近的查询记录列表（最近10条）
   - `/api/datasets/:datasetId/hit` - 知识库召回测试，支持 full_text/semantic/hybrid 检索
 

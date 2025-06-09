@@ -8,6 +8,7 @@
  * 3. 文档点击统计
  * 4. 文档处理规则管理
  * 5. 文档状态更新和启用/禁用控制
+ * 6. 单个文档的详细信息查询
  */
 
 // import { randomUUIDv7 } from 'bun';
@@ -39,7 +40,17 @@ import type {
   GetDocumentBatchRes,
 } from '@/schemas/document-schema';
 import { format } from 'date-fns';
-import { and, count, desc, eq, inArray, like, max, sql } from 'drizzle-orm';
+import {
+  and,
+  count,
+  desc,
+  eq,
+  inArray,
+  like,
+  max,
+  sql,
+  sum,
+} from 'drizzle-orm';
 
 /**
  * 分页获取文档列表
@@ -493,4 +504,67 @@ export const updateDocumentEnabled = async (
     );
     await releaseLock(lockKey, lockValue);
   }
+};
+
+/**
+ * 获取单个文档的详细信息
+ *
+ * @param datasetId - 数据集ID，用于定位特定数据集中的文档
+ * @param documentId - 文档ID，用于定位特定文档
+ * @param userId - 用户ID，用于权限验证
+ * @returns 文档的详细信息，包括基本信息和统计信息
+ * @throws NotFoundException 当文档不存在时抛出
+ *
+ * 功能说明：
+ * 1. 验证文档的存在性和所有权
+ * 2. 获取文档的基本信息
+ * 3. 统计文档的分段数量和点击次数
+ * 4. 返回格式化的文档详细信息
+ */
+export const getDocument = async (
+  datasetId: string,
+  documentId: string,
+  userId: string,
+) => {
+  // 查询文档基本信息
+  const docs = await db
+    .select()
+    .from(document)
+    .where(
+      and(
+        eq(document.id, documentId),
+        eq(document.datasetId, datasetId),
+        eq(document.userId, userId),
+      ),
+    );
+
+  if (docs.length === 0) {
+    throw new NotFoundException('文档不存在');
+  }
+
+  // 查询文档的分段统计信息
+  const segmentData = await db
+    .select({
+      segmentCount: count(segment.id),
+      hitCount: sum(segment.hitCount),
+    })
+    .from(segment)
+    .where(eq(segment.documentId, documentId));
+
+  // 返回格式化的文档信息
+  return {
+    id: docs[0].id,
+    datasetId: docs[0].datasetId,
+    name: docs[0].name,
+    segmentCount: segmentData[0]?.segmentCount ?? 0,
+    characterCount: docs[0].characterCount,
+    hitCount: segmentData[0]?.hitCount ?? 0,
+    position: docs[0].position,
+    enabled: docs[0].enabled,
+    disabledAt: docs[0].disabledAt?.getTime() ?? 0,
+    status: docs[0].status,
+    error: docs[0].error,
+    createdAt: docs[0].createdAt.getTime(),
+    updatedAt: docs[0].updatedAt.getTime(),
+  };
 };

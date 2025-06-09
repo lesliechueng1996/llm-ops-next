@@ -10,6 +10,8 @@
  * 5. 文档状态更新和启用/禁用控制
  */
 
+// import { randomUUIDv7 } from 'bun';
+import { randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   ConflictException,
@@ -36,8 +38,6 @@ import type {
   CreateDocumentReq,
   GetDocumentBatchRes,
 } from '@/schemas/document-schema';
-// import { randomUUIDv7 } from 'bun';
-import { randomUUID } from 'node:crypto';
 import { format } from 'date-fns';
 import { and, count, desc, eq, inArray, like, max, sql } from 'drizzle-orm';
 

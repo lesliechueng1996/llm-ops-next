@@ -15,6 +15,8 @@
  * - 并发控制：使用自定义并发任务管理器
  */
 
+// import { randomUUIDv7 } from 'bun';
+import { randomUUID } from 'node:crypto';
 import { db } from '@/lib/db';
 import {
   document,
@@ -41,8 +43,6 @@ import {
   getOrCreateKeywordTable,
 } from '@/services/keyword-table';
 import type { Document } from '@langchain/core/documents';
-// import { randomUUIDv7 } from 'bun';
-import { randomUUID } from 'node:crypto';
 import { and, eq, inArray, max } from 'drizzle-orm';
 
 /**

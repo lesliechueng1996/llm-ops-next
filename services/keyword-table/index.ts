@@ -15,13 +15,13 @@
  * - value: 包含该关键词的文本片段ID数组
  */
 
+// import { randomUUIDv7 } from 'bun';
+import { randomUUID } from 'node:crypto';
 import { db } from '@/lib/db';
 import { keywordTable, segment } from '@/lib/db/schema';
 import { LOCK_KEYWORD_TABLE_UPDATE_KEYWORD_TABLE } from '@/lib/entity';
 import { log } from '@/lib/logger';
 import { acquireLock } from '@/lib/redis/lock';
-// import { randomUUIDv7 } from 'bun';
-import { randomUUID } from 'node:crypto';
 import { eq, inArray } from 'drizzle-orm';
 
 /**

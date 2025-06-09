@@ -5,9 +5,9 @@
 
 import { BadRequestException } from '@/exceptions';
 import { verifyApiKey } from '@/lib/auth/dal';
+import { log } from '@/lib/logger';
 import { handleRouteError, successResult } from '@/lib/route-common';
 import { saveUploadFile, uploadFile } from '@/services/upload-file';
-import { log } from '@/lib/logger';
 
 const SUPPORTED_FILE_EXTENSIONS = [
   'pdf',

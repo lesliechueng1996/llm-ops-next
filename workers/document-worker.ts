@@ -3,7 +3,7 @@ import {
   BUILD_DOCUMENTS_TASK_NAME,
   UPDATE_DOCUMENT_ENABLED_TASK_NAME,
 } from '@/lib/queues/queue-name';
-import { buildDocuments } from '@/services/indexing';
+import { buildDocuments, updateDocumentEnabled } from '@/services/indexing';
 import type { Job } from 'bullmq';
 
 export default async function (job: Job) {
@@ -16,6 +16,8 @@ export default async function (job: Job) {
     await buildDocuments(documentIds, datasetId);
   } else if (name === UPDATE_DOCUMENT_ENABLED_TASK_NAME) {
     log.info('Updating document enabled, data: %o', data);
+    const { documentId, enabled, lockKey, lockValue } = data;
+    await updateDocumentEnabled(documentId, enabled, lockKey, lockValue);
   } else {
     log.error('Unknown job name: %s', name);
   }

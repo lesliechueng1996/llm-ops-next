@@ -612,6 +612,12 @@ export const updateDocumentEnabled = async (
       await deleteKeywordTableFromSegmentIds(doc.datasetId, segmentIds);
     }
   } catch (error) {
+    log.error(
+      'Update document enabled state failed, documentId: %s, enabled: %s, error: %o',
+      documentId,
+      enabled,
+      error,
+    );
   } finally {
     await releaseLock(lockKey, lockValue);
   }

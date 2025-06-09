@@ -21,7 +21,7 @@ import { db } from '@/lib/db';
 import { keywordTable, segment } from '@/lib/db/schema';
 import { LOCK_KEYWORD_TABLE_UPDATE_KEYWORD_TABLE } from '@/lib/entity';
 import { log } from '@/lib/logger';
-import { acquireLock } from '@/lib/redis/lock';
+import { acquireLock, releaseLock } from '@/lib/redis/lock';
 import { eq, inArray } from 'drizzle-orm';
 
 /**
@@ -115,44 +115,56 @@ export const addKeywordTableFromSegmentIds = async (
     return;
   }
 
-  const keywordTableRecord = await getOrCreateKeywordTable(datasetId);
-  const allKeywordMap = buildKeywordMap(keywordTableRecord);
-  log.info(
-    'Before add keyword table count: %d, datasetId: %s',
-    allKeywordMap.size,
-    datasetId,
-  );
+  try {
+    const keywordTableRecord = await getOrCreateKeywordTable(datasetId);
+    const allKeywordMap = buildKeywordMap(keywordTableRecord);
+    log.info(
+      'Before add keyword table count: %d, datasetId: %s',
+      allKeywordMap.size,
+      datasetId,
+    );
 
-  const segmentRecords = await db
-    .select({
-      id: segment.id,
-      keywords: segment.keywords,
-    })
-    .from(segment)
-    .where(inArray(segment.id, segmentIds));
+    const segmentRecords = await db
+      .select({
+        id: segment.id,
+        keywords: segment.keywords,
+      })
+      .from(segment)
+      .where(inArray(segment.id, segmentIds));
 
-  for (const segmentRecord of segmentRecords) {
-    const keywords = segmentRecord.keywords as string[];
-    for (const keyword of keywords) {
-      if (!allKeywordMap.has(keyword)) {
-        allKeywordMap.set(keyword, new Set());
+    for (const segmentRecord of segmentRecords) {
+      const keywords = segmentRecord.keywords as string[];
+      for (const keyword of keywords) {
+        if (!allKeywordMap.has(keyword)) {
+          allKeywordMap.set(keyword, new Set());
+        }
+        allKeywordMap.get(keyword)?.add(segmentRecord.id);
       }
-      allKeywordMap.get(keyword)?.add(segmentRecord.id);
     }
+
+    log.info(
+      'After add keyword table count: %d, datasetId: %s',
+      allKeywordMap.size,
+      datasetId,
+    );
+
+    await db
+      .update(keywordTable)
+      .set({
+        keywords: formatKeywordMap(allKeywordMap),
+      })
+      .where(eq(keywordTable.id, keywordTableRecord.id));
+  } catch (err) {
+    log.error(
+      '添加关键词表失败，error: %o, datasetId: %s, segmentIds: %o',
+      err,
+      datasetId,
+      segmentIds,
+    );
+    throw err;
+  } finally {
+    await releaseLock(lockKey, lockValue);
   }
-
-  log.info(
-    'After add keyword table count: %d, datasetId: %s',
-    allKeywordMap.size,
-    datasetId,
-  );
-
-  await db
-    .update(keywordTable)
-    .set({
-      keywords: formatKeywordMap(allKeywordMap),
-    })
-    .where(eq(keywordTable.id, keywordTableRecord.id));
 };
 
 /**
@@ -181,34 +193,46 @@ export const deleteKeywordTableFromSegmentIds = async (
     );
     return;
   }
-  const deletedSegmentIdsSet = new Set<string>(segmentIds);
+  try {
+    const deletedSegmentIdsSet = new Set<string>(segmentIds);
 
-  const keywordTableRecord = await getOrCreateKeywordTable(datasetId);
-  const keywords = keywordTableRecord.keywords as Record<string, string[]>;
+    const keywordTableRecord = await getOrCreateKeywordTable(datasetId);
+    const keywords = keywordTableRecord.keywords as Record<string, string[]>;
 
-  log.info(
-    'Before delete keyword table count: %d, datasetId: %s',
-    Object.keys(keywords).length,
-    datasetId,
-  );
-  const remainKeywordMap = new Map<string, Array<string>>();
-  for (const keyword of Object.keys(keywords)) {
-    const keywordValuesSet = new Set(keywords[keyword]);
-    const diff = keywordValuesSet.difference(deletedSegmentIdsSet);
-    if (diff.size > 0) {
-      remainKeywordMap.set(keyword, Array.from(diff));
+    log.info(
+      'Before delete keyword table count: %d, datasetId: %s',
+      Object.keys(keywords).length,
+      datasetId,
+    );
+    const remainKeywordMap = new Map<string, Array<string>>();
+    for (const keyword of Object.keys(keywords)) {
+      const keywordValuesSet = new Set(keywords[keyword]);
+      const diff = keywordValuesSet.difference(deletedSegmentIdsSet);
+      if (diff.size > 0) {
+        remainKeywordMap.set(keyword, Array.from(diff));
+      }
     }
-  }
-  log.info(
-    'After delete keyword table count: %d, datasetId: %s',
-    remainKeywordMap.size,
-    datasetId,
-  );
+    log.info(
+      'After delete keyword table count: %d, datasetId: %s',
+      remainKeywordMap.size,
+      datasetId,
+    );
 
-  await db
-    .update(keywordTable)
-    .set({
-      keywords: formatKeywordMap(remainKeywordMap),
-    })
-    .where(eq(keywordTable.id, keywordTableRecord.id));
+    await db
+      .update(keywordTable)
+      .set({
+        keywords: formatKeywordMap(remainKeywordMap),
+      })
+      .where(eq(keywordTable.id, keywordTableRecord.id));
+  } catch (error) {
+    log.error(
+      '删除关键词表失败，error: %o, datasetId: %s, segmentIds: %o',
+      error,
+      datasetId,
+      segmentIds,
+    );
+    throw error;
+  } finally {
+    await releaseLock(lockKey, lockValue);
+  }
 };

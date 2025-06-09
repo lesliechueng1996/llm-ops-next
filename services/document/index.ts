@@ -32,7 +32,7 @@ import {
   buildDocumentsAyncTask,
   updateDocumentEnabledAsyncTask,
 } from '@/lib/queues/document-queue';
-import { acquireLock } from '@/lib/redis/lock';
+import { acquireLock, releaseLock } from '@/lib/redis/lock';
 import type { SearchPageReq } from '@/schemas/common-schema';
 import type {
   CreateDocumentReq,
@@ -477,10 +477,20 @@ export const updateDocumentEnabled = async (
     throw new ConflictException('当前文档正在修改启用状态，请稍后再次尝试');
   }
 
-  await db
-    .update(document)
-    .set({ enabled, disabledAt: enabled ? null : new Date() })
-    .where(and(eq(document.id, documentId), eq(document.userId, userId)));
+  try {
+    await db
+      .update(document)
+      .set({ enabled, disabledAt: enabled ? null : new Date() })
+      .where(and(eq(document.id, documentId), eq(document.userId, userId)));
 
-  updateDocumentEnabledAsyncTask(documentId, enabled, lockKey, lockValue);
+    updateDocumentEnabledAsyncTask(documentId, enabled, lockKey, lockValue);
+  } catch (error) {
+    log.error(
+      '更新文档启用状态失败, documentId: %s, enabled: %s, error: %o',
+      documentId,
+      enabled,
+      error,
+    );
+    await releaseLock(lockKey, lockValue);
+  }
 };

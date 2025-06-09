@@ -181,7 +181,7 @@ export type OpenapiSchema = z.infer<typeof openapiSchema>;
 export const DEFAULT_PROCESS_RULE = {
   mode: 'custom',
   rule: {
-    pre_process_rules: [
+    preProcessRules: [
       { id: 'remove_extra_space', enabled: true },
       { id: 'remove_url_and_email', enabled: true },
     ],
@@ -202,8 +202,8 @@ export const DEFAULT_PROCESS_RULE = {
         ' ',
         '',
       ],
-      chunk_size: 500,
-      chunk_overlap: 50,
+      chunkSize: 500,
+      chunkOverlap: 50,
     },
   },
 };

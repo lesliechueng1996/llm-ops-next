@@ -37,10 +37,12 @@ import {
   addKeywordTableFromSegmentIds,
   buildKeywordMap,
   deleteKeywordTableFromSegmentIds,
+  formatKeywordMap,
   getOrCreateKeywordTable,
 } from '@/services/keyword-table';
 import type { Document } from '@langchain/core/documents';
-import { randomUUIDv7 } from 'bun';
+// import { randomUUIDv7 } from 'bun';
+import { randomUUID } from 'node:crypto';
 import { and, eq, inArray, max } from 'drizzle-orm';
 
 /**
@@ -183,9 +185,10 @@ const parsingDocument = async (doc: typeof document.$inferSelect) => {
     .where(eq(document.id, doc.id));
 
   log.info(
-    'Document %s parsing complated, character count: %d',
+    'Document %s parsing complated, character count: %d, langchain docs length: %d',
     doc.id,
     characterCount,
+    langchainDocs.length,
   );
 
   return langchainDocs;
@@ -224,6 +227,7 @@ const splittingDocument = async (
     log.error('No process rule found %s', doc.processRuleId);
     throw new Error(`No process rule found ${doc.processRuleId}`);
   }
+  log.info('Process rule records: %o', processRuleRecords);
 
   // 创建文本分割器，根据处理规则和token计算方式
   const textSplitter = createTextSplitter(
@@ -231,6 +235,7 @@ const splittingDocument = async (
     calculateTokenCount,
   );
   // 清理每个文档片段的文本内容
+  log.info('Clean text before splitting.');
   for (const langchainDoc of langchainDocs) {
     langchainDoc.pageContent = cleanText(
       processRuleRecords[0],
@@ -239,7 +244,9 @@ const splittingDocument = async (
   }
 
   // 使用分割器将文档分割成更小的片段
+  log.info('Split documents.');
   const langchainSegments = await textSplitter.splitDocuments(langchainDocs);
+  log.info('Split documents completed.');
 
   // 获取最后一个片段的位置，用于确定新片段的位置
   const segmentPositionRecord = await db
@@ -249,6 +256,7 @@ const splittingDocument = async (
     .from(segment)
     .where(eq(segment.documentId, doc.id));
   let lastSegmentPosition = segmentPositionRecord[0]?.position ?? 0;
+  log.info('Last segment position: %d', lastSegmentPosition);
 
   // 准备片段数据，包括计算token数量和生成唯一标识
   const segments: (typeof segment.$inferInsert)[] = [];
@@ -263,7 +271,7 @@ const splittingDocument = async (
       userId: doc.userId,
       datasetId: doc.datasetId,
       documentId: doc.id,
-      nodeId: randomUUIDv7(), // 生成唯一节点ID
+      nodeId: randomUUID(), // 生成唯一节点ID
       position: lastSegmentPosition,
       content,
       characterCount: content.length,
@@ -274,6 +282,7 @@ const splittingDocument = async (
     segments.push(segment);
   }
 
+  log.info('Save segments.');
   // 在事务中保存片段并更新文档状态，确保数据一致性
   const segmentRecords = await db.transaction(async (tx) => {
     const saveSegmentBatchQuery = tx
@@ -379,9 +388,7 @@ const indexingDocument = async (
     const updateKeywordTableQuery = tx
       .update(keywordTable)
       .set({
-        keywords: Object.entries(keywordMapping).map((item) => ({
-          [item[0]]: Array.from(item[1]),
-        })),
+        keywords: formatKeywordMap(keywordMapping),
       })
       .where(eq(keywordTable.id, keywordTableRecord.id));
     // 更新文档状态为索引完成

@@ -185,7 +185,7 @@ export const createDocumentReqSchema = z
     if (data.processType === ProcessType.Automatic) {
       return {
         ...data,
-        rule: DEFAULT_PROCESS_RULE,
+        rule: DEFAULT_PROCESS_RULE.rule,
       };
     }
     return data;

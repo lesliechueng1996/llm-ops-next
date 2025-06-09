@@ -36,7 +36,8 @@ import type {
   CreateDocumentReq,
   GetDocumentBatchRes,
 } from '@/schemas/document-schema';
-import { randomUUIDv7 } from 'bun';
+// import { randomUUIDv7 } from 'bun';
+import { randomUUID } from 'node:crypto';
 import { format } from 'date-fns';
 import { and, count, desc, eq, inArray, like, max, sql } from 'drizzle-orm';
 
@@ -181,7 +182,8 @@ export const createDocuments = async (
   }
 
   // 生成批次ID，用于跟踪同一批次的文档
-  const batchId = `${format(new Date(), 'yyyyMMddHHmmss')}-${randomUUIDv7()}`;
+  const batchId = `${format(new Date(), 'yyyyMMddHHmmss')}-${randomUUID()}`;
+  log.info('生成批次ID: %s', batchId);
 
   // 获取当前最大位置值，用于新文档的位置排序
   const lastDocumentPosition = await db
@@ -189,6 +191,7 @@ export const createDocuments = async (
     .from(document)
     .where(and(eq(document.userId, userId), eq(document.datasetId, datasetId)));
   let lastPosition = lastDocumentPosition[0]?.position ?? 0;
+  log.info('当前最大位置值: %d', lastPosition);
 
   // 在事务中创建处理规则和文档记录
   const docs = await db.transaction(async (tx) => {
@@ -228,9 +231,10 @@ export const createDocuments = async (
 
   // 获取新创建的文档ID
   const documentIds = docs.map((doc) => doc.id);
+  log.info('新创建的文档ID: %o', documentIds);
 
   // 启动异步文档处理任务
-  buildDocumentsAyncTask(documentIds);
+  buildDocumentsAyncTask(documentIds, datasetId);
 
   // 返回创建结果
   return {
@@ -466,7 +470,7 @@ export const updateDocumentEnabled = async (
     '{document_id}',
     documentId,
   );
-  const lockValue = randomUUIDv7();
+  const lockValue = randomUUID();
   const lockAcquired = await acquireLock(lockKey, lockValue);
   if (!lockAcquired) {
     log.warn('获取锁失败, key: %s, value: %s', lockKey, lockValue);

@@ -16,6 +16,7 @@
  */
 
 import { verifyApiKey } from '@/lib/auth/dal';
+import { log } from '@/lib/logger';
 import { loadSearchPageReqParams } from '@/lib/paginator';
 import { handleRouteError, successResult } from '@/lib/route-common';
 import {
@@ -259,9 +260,11 @@ export async function GET(request: Request, { params }: Params) {
  */
 export async function POST(request: Request, { params }: Params) {
   try {
+    log.info('开始处理文档创建请求');
     const { userId } = await verifyApiKey();
     const [{ datasetId }, data] = await Promise.all([params, request.json()]);
     const req = createDocumentReqSchema.parse(data);
+    log.info('文档创建请求参数: %o', req);
     const result = await createDocuments(userId, datasetId, req);
     return successResult(result, 201, '创建成功');
   } catch (error) {

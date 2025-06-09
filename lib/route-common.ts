@@ -52,6 +52,7 @@ export const handleRouteError = (error: unknown) => {
 
   // 处理未知错误
   log.error('未知错误: %o', error);
+  console.error(error);
   return Response.json(
     {
       code: 'INTERNAL_SERVER_ERROR',

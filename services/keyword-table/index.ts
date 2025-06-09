@@ -20,7 +20,8 @@ import { keywordTable, segment } from '@/lib/db/schema';
 import { LOCK_KEYWORD_TABLE_UPDATE_KEYWORD_TABLE } from '@/lib/entity';
 import { log } from '@/lib/logger';
 import { acquireLock } from '@/lib/redis/lock';
-import { randomUUIDv7 } from 'bun';
+// import { randomUUIDv7 } from 'bun';
+import { randomUUID } from 'node:crypto';
 import { eq, inArray } from 'drizzle-orm';
 
 /**
@@ -77,6 +78,16 @@ export const buildKeywordMap = (
   return allKeywordMap;
 };
 
+export const formatKeywordMap = (
+  keywordMap: Map<string, Set<string> | Array<string>>,
+) => {
+  const result: Record<string, string[]> = {};
+  for (const [keyword, values] of keywordMap.entries()) {
+    result[keyword] = Array.from(values);
+  }
+  return result;
+};
+
 /**
  * 从指定的文本片段添加关键词到关键词表
  * 使用分布式锁确保并发安全
@@ -93,7 +104,7 @@ export const addKeywordTableFromSegmentIds = async (
     '{dataset_id}',
     datasetId,
   );
-  const lockValue = randomUUIDv7();
+  const lockValue = randomUUID();
   const lockAcquired = await acquireLock(lockKey, lockValue);
   if (!lockAcquired) {
     log.error(
@@ -139,7 +150,7 @@ export const addKeywordTableFromSegmentIds = async (
   await db
     .update(keywordTable)
     .set({
-      keywords: Object.fromEntries(allKeywordMap),
+      keywords: formatKeywordMap(allKeywordMap),
     })
     .where(eq(keywordTable.id, keywordTableRecord.id));
 };
@@ -160,7 +171,7 @@ export const deleteKeywordTableFromSegmentIds = async (
     '{dataset_id}',
     datasetId,
   );
-  const lockValue = randomUUIDv7();
+  const lockValue = randomUUID();
   const lockAcquired = await acquireLock(lockKey, lockValue);
   if (!lockAcquired) {
     log.error(
@@ -197,7 +208,7 @@ export const deleteKeywordTableFromSegmentIds = async (
   await db
     .update(keywordTable)
     .set({
-      keywords: Object.fromEntries(remainKeywordMap),
+      keywords: formatKeywordMap(remainKeywordMap),
     })
     .where(eq(keywordTable.id, keywordTableRecord.id));
 };

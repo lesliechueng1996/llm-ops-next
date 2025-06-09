@@ -19,7 +19,8 @@ import {
 import { ALLOWED_IMAGE_EXTENSIONS, ALLOWED_IMAGE_SIZE } from '@/lib/entity';
 import { withTempFile } from '@/lib/file-util';
 import { log } from '@/lib/logger';
-import { randomUUIDv7 } from 'bun';
+// import { randomUUIDv7 } from 'bun';
+import { randomUUID } from 'node:crypto';
 import COS from 'cos-nodejs-sdk-v5';
 import { format } from 'date-fns';
 import { getCredential } from 'qcloud-cos-sts';
@@ -38,7 +39,7 @@ const cos = new COS({
  */
 const generateFileKey = (ext: string) => {
   const date = format(new Date(), 'yyyyMMdd');
-  return `${date}/${randomUUIDv7()}.${ext}`;
+  return `${date}/${randomUUID()}.${ext}`;
 };
 
 /**
@@ -135,9 +136,9 @@ export const uploadFile = async (file: File) => {
       await fs.writeFile(tempFilePath, Buffer.from(fileData));
 
       // 对中文文件名进行编码处理
-      const encodedOriginalname = Buffer.from(file.name, 'latin1').toString(
-        'utf8',
-      );
+      // const encodedOriginalname = Buffer.from(file.name, 'latin1').toString(
+      //   'utf8',
+      // );
 
       const uploadPromise = new Promise<COS.UploadFileResult>(
         (resolve, reject) => {
@@ -156,6 +157,7 @@ export const uploadFile = async (file: File) => {
             },
             (err, data) => {
               if (err) {
+                log.error('上传文件失败: %o', err);
                 reject(err);
               } else {
                 resolve(data);
@@ -169,7 +171,7 @@ export const uploadFile = async (file: File) => {
       log.info('上传文件成功');
 
       return {
-        name: encodedOriginalname,
+        name: file.name,
         key: fileKey,
         size: file.size,
         extension: ext,

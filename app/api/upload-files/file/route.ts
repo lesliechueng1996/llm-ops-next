@@ -7,6 +7,7 @@ import { BadRequestException } from '@/exceptions';
 import { verifyApiKey } from '@/lib/auth/dal';
 import { handleRouteError, successResult } from '@/lib/route-common';
 import { saveUploadFile, uploadFile } from '@/services/upload-file';
+import { log } from '@/lib/logger';
 
 const SUPPORTED_FILE_EXTENSIONS = [
   'pdf',
@@ -93,15 +94,18 @@ const SUPPORTED_FILE_EXTENSIONS = [
  */
 export async function POST(request: Request) {
   try {
+    log.info('开始处理文件上传请求');
     const { userId } = await verifyApiKey();
     const formData = await request.formData();
     const files = formData.getAll('file');
     if (files.length !== 1) {
+      log.warn('文件上传失败，仅支持上传一个文件');
       throw new BadRequestException('文件上传失败，仅支持上传一个文件');
     }
 
     const file = files[0] as File;
     if (file.size > 15 * 1024 * 1024) {
+      log.warn('文件上传失败，文件大小不能超过 15 MB');
       throw new BadRequestException('文件上传失败，文件大小不能超过 15 MB');
     }
 
@@ -115,13 +119,19 @@ export async function POST(request: Request) {
     }
 
     if (!fileTypeValid) {
+      log.warn(
+        '文件上传 %s 失败，仅支持上传 PDF、DOC、DOCX、XLS、XLSX、PPT、PPTX 及文本文件',
+        file.name,
+      );
       throw new BadRequestException(
         '文件上传失败，仅支持上传 PDF、DOC、DOCX、XLS、XLSX、PPT、PPTX 及文本文件',
       );
     }
 
     const uploadResult = await uploadFile(file);
+    log.info('文件上传成功，文件信息: %o', uploadResult);
     const uploadFileRecord = await saveUploadFile(uploadResult, userId);
+    log.info('文件保存成功，文件信息: %o', uploadFileRecord);
 
     return successResult(
       {

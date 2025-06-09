@@ -144,7 +144,7 @@ bun run db:push
 ### 开发
 
 ```bash
-bun run dev
+bun --bun run dev
 ```
 
 ### 构建
@@ -179,7 +179,7 @@ bun run start
 
 ## 开发命令
 
-- `bun run dev` - 启动开发服务器
+- `bun --bun run dev` - 启动开发服务器
 - `bun run build` - 构建生产版本
 - `bun run start` - 运行生产版本
 - `bun run lint` - 运行代码检查
@@ -188,8 +188,4 @@ bun run start
 - `bun run db:generate` - 生成数据库迁移文件
 - `bun run db:migrate` - 执行数据库迁移
 
-docker run --name llm-ops-next-weaviate --env=PERSISTENCE_DATA_PATH=/app/data --volume=/<your data path>:/app/data --network=bridge --workdir=/ -p 50051:50051 -p 8080:8080 --restart=no --runtime=runc -d cr.weaviate.io/semitechnologies/weaviate:1.31.0 
-
-docker run --name llm-ops-next-redis --volume=/<your data path>:/data --volume=/data --network=bridge --workdir=/data -p 6379:6379 --restart=no --runtime=runc -d redis
-
-docker run -p 8000:8000 -d --rm --name unstructured-api robwilkes/unstructured-api:latest
+docker compose up -d

@@ -6,6 +6,7 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { log } from '@/lib/logger';
 
 /**
@@ -66,7 +67,8 @@ export const withTempFile = async <T>(
  */
 export const hashText = (text: string) => {
   // 创建 SHA-256 哈希器实例
-  const hasher = new Bun.CryptoHasher('sha256');
+  // const hasher = new Bun.CryptoHasher('sha256');
+  const hasher = createHash('sha256');
   // 更新哈希器内容并返回十六进制格式的哈希值
   return hasher.update(text).digest('hex');
 };

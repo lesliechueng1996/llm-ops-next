@@ -35,19 +35,23 @@ const documentQueue = new Queue(DOCUMENT_QUEUE_NAME, {
  * 该函数用于批量处理多个文档的构建任务。
  *
  * @param documentIds - 需要构建的文档ID数组
+ * @param datasetId - 数据集ID
  * @returns Promise<Job> - 返回队列任务实例，可用于跟踪任务状态
  *
  * @example
  * ```typescript
- * await buildDocumentsAyncTask(['doc1', 'doc2']);
+ * await buildDocumentsAyncTask(['doc1', 'doc2'], 'dataset1');
  * ```
  */
-export const buildDocumentsAyncTask = async (documentIds: string[]) => {
+export const buildDocumentsAyncTask = async (
+  documentIds: string[],
+  datasetId: string,
+) => {
   log.info('Building documents: %o', documentIds);
 
   return documentQueue.add(
     BUILD_DOCUMENTS_TASK_NAME,
-    { documentIds },
+    { documentIds, datasetId },
     {
       removeOnComplete: true, // 任务完成后自动从队列中移除
       removeOnFail: true, // 任务失败后自动从队列中移除

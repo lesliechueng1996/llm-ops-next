@@ -9,14 +9,14 @@ describe('fileExtractor', () => {
   const fixturesPath = path.join(__dirname, '__fixtures__');
 
   describe('loadFromFile', () => {
-    it('should load text from txt file', async () => {
-      const filePath = path.join(fixturesPath, 'sample.json');
+    it('should load text from md file', async () => {
+      const filePath = path.join(fixturesPath, 'sample.md');
       // const result = await fileExtractor.loadFromUrl(
       //   'https://cdn.openai.com/API/docs/deep_research_blog.pdf',
       //   false,
       // );
       const result = await fileExtractor.loadFromFile(filePath);
-      console.log(result);
+      console.log(result.length);
       expect(result).toBeDefined();
     });
   });

@@ -50,6 +50,10 @@ export const loadFromFile = async (
   } else {
     loader = new UnstructuredLoader(filePath, {
       apiUrl: process.env.UNSTRUCTURED_API_URL,
+      strategy: 'fast',
+      chunkingStrategy: 'by_title',
+      combineUnderNChars: 2000,
+      maxCharacters: 2000,
     });
   }
 

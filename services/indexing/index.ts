@@ -6,6 +6,7 @@
  * 2. 文档分割：将文档分割成更小的片段
  * 3. 文档索引：为文档片段创建关键词索引
  * 4. 文档存储：将处理后的文档片段存储到向量数据库中
+ * 5. 文档管理：支持文档的启用/禁用和删除操作
  *
  * 主要依赖：
  * - 数据库操作：使用 Drizzle ORM
@@ -13,6 +14,7 @@
  * - 文本处理：使用 LangChain 进行文档处理
  * - 关键词提取：使用自定义关键词提取算法
  * - 并发控制：使用自定义并发任务管理器
+ * - 分布式锁：使用 Redis 实现分布式锁
  */
 
 // import { randomUUIDv7 } from 'bun';
@@ -621,4 +623,36 @@ export const updateDocumentEnabled = async (
   } finally {
     await releaseLock(lockKey, lockValue);
   }
+};
+
+/**
+ * 删除文档
+ *
+ * 从系统中完全删除文档及其相关数据，包括：
+ * 1. 从向量数据库中删除文档片段
+ * 2. 从关键词表中删除相关片段的关键词
+ *
+ * 处理流程：
+ * 1. 获取向量存储集合
+ * 2. 并行执行删除操作：
+ *    - 删除向量数据库中的文档片段
+ *    - 删除关键词表中的相关片段
+ *
+ * @param datasetId - 数据集ID
+ * @param documentId - 要删除的文档ID
+ * @param segmentIds - 要删除的片段ID数组
+ */
+export const deleteDocument = async (
+  datasetId: string,
+  documentId: string,
+  segmentIds: string[],
+) => {
+  const collection = vectorStoreCollection();
+
+  await Promise.all([
+    collection.data.deleteMany(
+      collection.filter.byProperty('document_id').equal(documentId),
+    ),
+    deleteKeywordTableFromSegmentIds(datasetId, segmentIds),
+  ]);
 };

@@ -6,7 +6,9 @@
  */
 
 import { drizzle } from 'drizzle-orm/bun-sql';
-// import { drizzle } from 'drizzle-orm/node-postgres';
 
 // 初始化数据库连接
-export const db = drizzle(process.env.DATABASE_URL || '');
+export const db = drizzle({
+  connection: process.env.DATABASE_URL || '',
+  logger: true,
+});

@@ -9,6 +9,7 @@
  * 4. 文档处理规则管理
  * 5. 文档状态更新和启用/禁用控制
  * 6. 单个文档的详细信息查询
+ * 7. 文档删除和验证
  */
 
 // import { randomUUIDv7 } from 'bun';
@@ -31,6 +32,7 @@ import { log } from '@/lib/logger';
 import { calculatePagination, paginationResult } from '@/lib/paginator';
 import {
   buildDocumentsAyncTask,
+  deleteDocumentAsyncTask,
   updateDocumentEnabledAsyncTask,
 } from '@/lib/queues/document-queue';
 import { acquireLock, releaseLock } from '@/lib/redis/lock';
@@ -456,21 +458,7 @@ export const updateDocumentEnabled = async (
   datasetId: string,
   userId: string,
 ) => {
-  const docs = await db
-    .select()
-    .from(document)
-    .where(
-      and(
-        eq(document.id, documentId),
-        eq(document.datasetId, datasetId),
-        eq(document.userId, userId),
-      ),
-    );
-
-  if (docs.length === 0) {
-    throw new NotFoundException('文档不存在');
-  }
-  const doc = docs[0];
+  const doc = await validateAndGetDocument(datasetId, documentId, userId);
   if (doc.status !== DocumentStatus.COMPLETED) {
     throw new BadRequestException('文档未完成解析，暂无法修改');
   }
@@ -527,6 +515,102 @@ export const getDocument = async (
   userId: string,
 ) => {
   // 查询文档基本信息
+  const doc = await validateAndGetDocument(datasetId, documentId, userId);
+
+  // 查询文档的分段统计信息
+  const segmentData = await db
+    .select({
+      segmentCount: count(segment.id),
+      hitCount: sum(segment.hitCount),
+    })
+    .from(segment)
+    .where(eq(segment.documentId, documentId));
+
+  // 返回格式化的文档信息
+  return {
+    id: doc.id,
+    datasetId: doc.datasetId,
+    name: doc.name,
+    segmentCount: segmentData[0]?.segmentCount ?? 0,
+    characterCount: doc.characterCount,
+    hitCount: segmentData[0]?.hitCount ?? 0,
+    position: doc.position,
+    enabled: doc.enabled,
+    disabledAt: doc.disabledAt?.getTime() ?? 0,
+    status: doc.status,
+    error: doc.error,
+    createdAt: doc.createdAt.getTime(),
+    updatedAt: doc.updatedAt.getTime(),
+  };
+};
+
+/**
+ * 删除文档及其相关数据
+ *
+ * @param datasetId - 数据集ID，用于定位特定数据集中的文档
+ * @param documentId - 文档ID，用于定位要删除的文档
+ * @param userId - 用户ID，用于权限验证
+ * @throws NotFoundException 当文档不存在时抛出
+ * @throws BadRequestException 当文档未完成解析时抛出
+ *
+ * 功能说明：
+ * 1. 验证文档的存在性和所有权
+ * 2. 检查文档状态是否允许删除
+ * 3. 获取文档相关的所有分段ID
+ * 4. 删除文档记录
+ * 5. 触发异步任务清理相关数据
+ */
+export const deleteDocument = async (
+  datasetId: string,
+  documentId: string,
+  userId: string,
+) => {
+  const doc = await validateAndGetDocument(datasetId, documentId, userId);
+
+  if (
+    doc.status !== DocumentStatus.COMPLETED &&
+    doc.status !== DocumentStatus.ERROR
+  ) {
+    throw new BadRequestException('文档未完成解析，暂无法删除');
+  }
+
+  const segmentRecords = await db
+    .select({ id: segment.id })
+    .from(segment)
+    .where(
+      and(
+        eq(segment.documentId, documentId),
+        eq(segment.datasetId, datasetId),
+        eq(segment.userId, userId),
+      ),
+    );
+
+  const segmentIds = segmentRecords.map((item) => item.id);
+
+  await db.delete(document).where(eq(document.id, documentId));
+  deleteDocumentAsyncTask(datasetId, documentId, segmentIds);
+};
+
+/**
+ * 验证并获取文档信息
+ *
+ * @param datasetId - 数据集ID，用于定位特定数据集中的文档
+ * @param documentId - 文档ID，用于定位特定文档
+ * @param userId - 用户ID，用于权限验证
+ * @returns 文档的完整信息
+ * @throws NotFoundException 当文档不存在时抛出
+ *
+ * 功能说明：
+ * 1. 验证文档的存在性
+ * 2. 验证文档的所有权
+ * 3. 返回文档的完整信息
+ */
+export const validateAndGetDocument = async (
+  datasetId: string,
+  documentId: string,
+  userId: string,
+) => {
+  // 查询文档基本信息
   const docs = await db
     .select()
     .from(document)
@@ -542,29 +626,5 @@ export const getDocument = async (
     throw new NotFoundException('文档不存在');
   }
 
-  // 查询文档的分段统计信息
-  const segmentData = await db
-    .select({
-      segmentCount: count(segment.id),
-      hitCount: sum(segment.hitCount),
-    })
-    .from(segment)
-    .where(eq(segment.documentId, documentId));
-
-  // 返回格式化的文档信息
-  return {
-    id: docs[0].id,
-    datasetId: docs[0].datasetId,
-    name: docs[0].name,
-    segmentCount: segmentData[0]?.segmentCount ?? 0,
-    characterCount: docs[0].characterCount,
-    hitCount: segmentData[0]?.hitCount ?? 0,
-    position: docs[0].position,
-    enabled: docs[0].enabled,
-    disabledAt: docs[0].disabledAt?.getTime() ?? 0,
-    status: docs[0].status,
-    error: docs[0].error,
-    createdAt: docs[0].createdAt.getTime(),
-    updatedAt: docs[0].updatedAt.getTime(),
-  };
+  return docs[0];
 };

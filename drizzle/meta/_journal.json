@@ -71,6 +71,20 @@
       "when": 1749138953349,
       "tag": "0009_little_starbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1749484474685,
+      "tag": "0010_sturdy_pestilence",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1749484749362,
+      "tag": "0011_heavy_miek",
+      "breakpoints": true
     }
   ]
 }

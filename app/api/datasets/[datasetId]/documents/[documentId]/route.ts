@@ -1,12 +1,24 @@
 /**
  * 文档管理 API 路由处理模块
- * 该模块提供了获取单个文档详细信息的 API 端点
+ *
+ * 该模块提供了以下功能：
+ * 1. 获取单个文档的详细信息（GET）
+ * 2. 删除指定文档及其相关数据（DELETE）
+ *
+ * 主要功能：
+ * - 文档信息查询：支持获取文档的基本信息、状态、统计等数据
+ * - 文档删除：支持删除文档及其关联的片段数据，包括向量数据库中的相关数据
+ *
+ * 安全特性：
+ * - 所有接口都需要通过 API Key 验证
+ * - 操作时会验证用户权限
+ *
  * @module app/api/datasets/[datasetId]/documents/[documentId]/route
  */
 
 import { verifyApiKey } from '@/lib/auth/dal';
 import { handleRouteError, successResult } from '@/lib/route-common';
-import { getDocument } from '@/services/document';
+import { deleteDocument, getDocument } from '@/services/document';
 
 // 定义路由参数类型
 type Params = { params: Promise<{ datasetId: string; documentId: string }> };
@@ -113,6 +125,63 @@ export async function GET(_: Request, { params }: Params) {
     // 获取文档信息
     const document = await getDocument(datasetId, documentId, userId);
     return successResult(document);
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}
+
+/**
+ * @swagger
+ * /api/datasets/{datasetId}/documents/{documentId}:
+ *   delete:
+ *     tags:
+ *       - Documents
+ *     summary: 删除指定文档信息
+ *     description: 该接口会根据传递的信息删除文档信息，并删除该文档下的片段信息，同时会将操作同步到向量数据库，在向量数据库中删除归属该文档的所有片段信息，该接口属于耗时接口，所以在后端使用异步任务队列的方式进行操作，完成基础信息的删除（例如文档记录）后，接口即会正常响应前端（删除文档、文档片段、关键词表数据、weaviate数据，同时在删除的时候需要上锁）。
+ *     parameters:
+ *       - in: path
+ *         name: datasetId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: 该文档归属的知识库 id，类型为 uuid
+ *       - in: path
+ *         name: documentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: 需要删除的文档 id，类型为 uuid
+ *     responses:
+ *       200:
+ *         description: 删除成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                 message:
+ *                   type: string
+ *                   example: 删除文档成功
+ */
+
+export async function DELETE(_: Request, { params }: Params) {
+  try {
+    // 并行验证 API Key 和获取路由参数
+    const [{ userId }, { datasetId, documentId }] = await Promise.all([
+      verifyApiKey(),
+      params,
+    ]);
+
+    // 删除文档信息
+    await deleteDocument(datasetId, documentId, userId);
+    return successResult(null, 200, '删除文档成功');
   } catch (error) {
     return handleRouteError(error);
   }

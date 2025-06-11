@@ -92,6 +92,9 @@
   - `/api/datasets/:datasetId/documents/:documentId` - 获取特定文档的详细信息
   - `/api/datasets/:datasetId/documents/:documentId/name` - 更新文档名称
   - `/api/datasets/:datasetId/documents/:documentId/enabled` - 更新文档启用状态
+  - `/api/datasets/:datasetId/documents/:documentId/segments` - 获取文档片段列表，支持分页和搜索
+  - `/api/datasets/:datasetId/documents/:documentId/segments/:segmentId` - 获取、更新和删除特定文档片段
+  - `/api/datasets/:datasetId/documents/:documentId/segments/:segmentId/enabled` - 更新文档片段启用状态
   - `/api/datasets/:datasetId/documents/batch/:batchId` - 查询文档批处理进度
   - `/api/datasets/:datasetId/queries` - 获取知识库最近的查询记录列表（最近10条）
   - `/api/datasets/:datasetId/hit` - 知识库召回测试，支持 full_text/semantic/hybrid 检索
@@ -115,7 +118,6 @@
 
 ### 前置要求
 
-- Node.js (推荐最新 LTS 版本)
 - Bun
 - PostgreSQL
 

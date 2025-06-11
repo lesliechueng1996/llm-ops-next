@@ -277,3 +277,14 @@ export const LOCK_DOCUMENT_UPDATE_ENABLED =
  */
 export const LOCK_KEYWORD_TABLE_UPDATE_KEYWORD_TABLE =
   'lock:keyword_table:update:keyword_table_{dataset_id}';
+
+/**
+ * 文档片段启用状态更新锁的键模板
+ * 用于在更新文档片段启用状态时防止并发操作
+ * 格式：lock:segment:update:enabled_{segment_id}
+ *
+ * @constant
+ * @type {string}
+ */
+export const LOCK_SEGMENT_UPDATE_ENABLED =
+  'lock:segment:update:enabled_{segment_id}';

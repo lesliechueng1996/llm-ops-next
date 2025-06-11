@@ -208,7 +208,7 @@ export const getDatasetById = async (userId: string, datasetId: string) => {
 
   const hitCountQuery = db
     .select({
-      hitCount: sum(segment.hitCount),
+      hitCount: sum(segment.hitCount).mapWith(Number),
     })
     .from(segment)
     .where(and(eq(segment.datasetId, datasetId), eq(segment.userId, userId)));

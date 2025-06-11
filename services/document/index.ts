@@ -42,17 +42,7 @@ import type {
   GetDocumentBatchRes,
 } from '@/schemas/document-schema';
 import { format } from 'date-fns';
-import {
-  and,
-  count,
-  desc,
-  eq,
-  inArray,
-  like,
-  max,
-  sql,
-  sum,
-} from 'drizzle-orm';
+import { and, asc, count, eq, inArray, like, max, sql, sum } from 'drizzle-orm';
 
 /**
  * 分页获取文档列表
@@ -92,7 +82,7 @@ export const getDocumentListByPage = async (
     .select()
     .from(document)
     .where(where)
-    .orderBy(desc(document.updatedAt))
+    .orderBy(asc(document.position))
     .limit(limit)
     .offset(offset);
 
@@ -521,7 +511,7 @@ export const getDocument = async (
   const segmentData = await db
     .select({
       segmentCount: count(segment.id),
-      hitCount: sum(segment.hitCount),
+      hitCount: sum(segment.hitCount).mapWith(Number),
     })
     .from(segment)
     .where(eq(segment.documentId, documentId));

@@ -6,8 +6,6 @@
  * 2. POST - 创建新的文档片段
  *
  * 路由路径：/api/datasets/[datasetId]/documents/[documentId]/segments
- *
- * @module segments
  */
 
 import { verifyApiKey } from '@/lib/auth/dal';

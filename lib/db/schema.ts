@@ -8,6 +8,8 @@ import {
   timestamp,
   unique,
   uuid,
+  numeric,
+  real,
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
@@ -319,4 +321,275 @@ export const keywordTable = pgTable(
       .$onUpdateFn(() => new Date()),
   },
   (table) => [unique('uq_keyword_table_dataset_id').on(table.datasetId)],
+);
+
+export const app = pgTable(
+  'app',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    name: text('name').notNull().default(''),
+    icon: text('icon').notNull().default(''),
+    description: text('description').notNull().default(''),
+    status: text('status').notNull().default(''),
+    appConfigId: text('app_config_id'),
+    draftAppConfigId: text('draft_app_config_id'),
+    debugConversationId: text('debug_conversation_id'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [index('idx_app_user_id').on(table.userId)],
+);
+
+export const appDatasetJoin = pgTable(
+  'app_dataset_join',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    appId: text('app_id').notNull(),
+    datasetId: text('dataset_id').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index('idx_app_dataset_join_app_id').on(table.appId),
+    index('idx_app_dataset_join_dataset_id').on(table.datasetId),
+  ],
+);
+
+export const appConfig = pgTable(
+  'app_config',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    appId: text('app_id')
+      .notNull()
+      .references(() => app.id, { onDelete: 'cascade' }),
+    modelConfig: jsonb('model_config').notNull().default('{}'),
+    dialogRound: integer('dialog_round').notNull().default(0),
+    presetPrompt: text('preset_prompt').notNull().default(''),
+    tools: jsonb('tools').notNull().default('[]'),
+    workflows: jsonb('workflows').notNull().default('[]'),
+    retrievalConfig: jsonb('retrieval_config').notNull().default('[]'),
+    longTermMemory: jsonb('long_term_memory').notNull().default('{}'),
+    openingStatement: text('opening_statement').notNull().default(''),
+    openingQuestions: jsonb('opening_questions').notNull().default('[]'),
+    speechToText: jsonb('speech_to_text').notNull().default('{}'),
+    textToSpeech: jsonb('text_to_speech').notNull().default('{}'),
+    suggestedAfterAnswer: jsonb('suggested_after_answer')
+      .notNull()
+      .default('{}'),
+    reviewConfig: jsonb('review_config').notNull().default('{}'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [index('idx_app_config_app_id').on(table.appId)],
+);
+
+export const appConfigVersion = pgTable(
+  'app_config_version',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    appId: text('app_id')
+      .notNull()
+      .references(() => app.id, { onDelete: 'cascade' }),
+    modelConfig: jsonb('model_config').notNull().default('{}'),
+    dialogRound: integer('dialog_round').notNull().default(0),
+    presetPrompt: text('preset_prompt').notNull().default(''),
+    tools: jsonb('tools').notNull().default('[]'),
+    workflows: jsonb('workflows').notNull().default('[]'),
+    retrievalConfig: jsonb('retrieval_config').notNull().default('[]'),
+    longTermMemory: jsonb('long_term_memory').notNull().default('{}'),
+    openingStatement: text('opening_statement').notNull().default(''),
+    openingQuestions: jsonb('opening_questions').notNull().default('[]'),
+    speechToText: jsonb('speech_to_text').notNull().default('{}'),
+    textToSpeech: jsonb('text_to_speech').notNull().default('{}'),
+    suggestedAfterAnswer: jsonb('suggested_after_answer')
+      .notNull()
+      .default('{}'),
+    reviewConfig: jsonb('review_config').notNull().default('{}'),
+    version: integer('version').notNull().default(0),
+    configType: text('config_type').notNull().default(''),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index('idx_app_config_version_app_id').on(table.appId),
+    unique('uq_app_config_version_app_id_version').on(
+      table.appId,
+      table.version,
+    ),
+  ],
+);
+
+export const conversation = pgTable(
+  'conversation',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    appId: text('app_id')
+      .notNull()
+      .references(() => app.id, { onDelete: 'cascade' }),
+    name: text('name').notNull().default(''),
+    summary: text('summary').notNull().default(''),
+    isPinned: boolean('is_pinned').notNull().default(false),
+    isDeleted: boolean('is_deleted').notNull().default(false),
+    invokeFrom: text('invoke_from').notNull().default(''),
+    createdBy: text('created_by').notNull().default(''),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [index('idx_conversation_app_id').on(table.appId)],
+);
+
+export const message = pgTable(
+  'message',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    appId: text('app_id')
+      .notNull()
+      .references(() => app.id, { onDelete: 'cascade' }),
+    conversationId: text('conversation_id')
+      .notNull()
+      .references(() => conversation.id, { onDelete: 'cascade' }),
+    invokeFrom: text('invoke_from').notNull().default(''),
+    createdBy: text('created_by').notNull().default(''),
+    query: text('query').notNull().default(''),
+    message: jsonb('message').notNull().default('[]'),
+    messageTokenCount: integer('message_token_count').notNull().default(0),
+    messageUnitPrice: numeric('message_unit_price', {
+      precision: 10,
+      scale: 7,
+    })
+      .notNull()
+      .default('0.0'),
+    messagePriceUnit: numeric('message_price_unit', {
+      precision: 10,
+      scale: 4,
+    })
+      .notNull()
+      .default('0.0'),
+    answer: text('answer').notNull().default(''),
+    answerTokenCount: integer('answer_token_count').notNull().default(0),
+    answerUnitPrice: numeric('answer_unit_price', {
+      precision: 10,
+      scale: 7,
+    })
+      .notNull()
+      .default('0.0'),
+    answerPriceUnit: numeric('answer_price_unit', {
+      precision: 10,
+      scale: 4,
+    })
+      .notNull()
+      .default('0.0'),
+    latency: real('latency').notNull().default(0.0),
+    isDeleted: boolean('is_deleted').notNull().default(false),
+    status: text('status').notNull().default(''),
+    error: text('error'),
+    totalTokenCount: integer('total_token_count').notNull().default(0),
+    totalPrice: numeric('total_price', {
+      precision: 10,
+      scale: 7,
+    })
+      .notNull()
+      .default('0.0'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index('idx_message_app_id_conversation_id').on(
+      table.appId,
+      table.conversationId,
+    ),
+  ],
+);
+
+export const messageAgentThought = pgTable(
+  'message_agent_thought',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    appId: text('app_id')
+      .notNull()
+      .references(() => app.id, { onDelete: 'cascade' }),
+    conversationId: text('conversation_id')
+      .notNull()
+      .references(() => conversation.id, { onDelete: 'cascade' }),
+    messageId: text('message_id')
+      .notNull()
+      .references(() => message.id, { onDelete: 'cascade' }),
+    invokeFrom: text('invoke_from').notNull().default(''),
+    createdBy: text('created_by').notNull().default(''),
+    position: integer('position').notNull().default(0),
+    event: text('event').notNull().default(''),
+    thought: text('thought').notNull().default(''),
+    observation: text('observation').notNull().default(''),
+    tool: text('tool').notNull().default(''),
+    toolInput: jsonb('tool_input').notNull().default('{}'),
+    message: jsonb('message').notNull().default('[]'),
+    messageTokenCount: integer('message_token_count').notNull().default(0),
+    messageUnitPrice: numeric('message_unit_price', {
+      precision: 10,
+      scale: 7,
+    })
+      .notNull()
+      .default('0.0'),
+    messagePriceUnit: numeric('message_price_unit', {
+      precision: 10,
+      scale: 4,
+    })
+      .notNull()
+      .default('0.0'),
+    answer: text('answer').notNull().default(''),
+    answerTokenCount: integer('answer_token_count').notNull().default(0),
+    answerUnitPrice: numeric('answer_unit_price', {
+      precision: 10,
+      scale: 7,
+    })
+      .notNull()
+      .default('0.0'),
+    answerPriceUnit: numeric('answer_price_unit', {
+      precision: 10,
+      scale: 4,
+    })
+      .notNull()
+      .default('0.0'),
+    totalTokenCount: integer('total_token_count').notNull().default(0),
+    totalPrice: numeric('total_price', {
+      precision: 10,
+      scale: 7,
+    })
+      .notNull()
+      .default('0.0'),
+    latency: real('latency').notNull().default(0.0),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index('idx_message_agent_thought_app_id_conversation_id_message_id').on(
+      table.appId,
+      table.conversationId,
+      table.messageId,
+    ),
+  ],
 );

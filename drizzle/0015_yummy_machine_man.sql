@@ -1,0 +1,1 @@
+ALTER TABLE "app_config_version" ADD COLUMN "datasets" jsonb DEFAULT '[]' NOT NULL;

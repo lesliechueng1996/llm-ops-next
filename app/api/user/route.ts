@@ -44,13 +44,13 @@ import { getUserInfoById } from '@/services/user';
  *                       description: 账号的头像 URL 地址
  *                     lastLoginAt:
  *                       type: integer
- *                       description: 账号最后一次登录时间戳（秒）
+ *                       description: 账号最后一次登录时间戳（毫秒）
  *                     lastLoginIp:
  *                       type: string
  *                       description: 账号最后一次登录的 ip 地址
  *                     createdAt:
  *                       type: integer
- *                       description: 账号的注册时间戳（秒）
+ *                       description: 账号的注册时间戳（毫秒）
  *                 message:
  *                   type: string
  *                   example: 获取用户信息成功

@@ -1,0 +1,1 @@
+DROP TABLE "app_dataset_join" CASCADE;

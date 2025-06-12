@@ -8,6 +8,7 @@
  * 4. 文本处理规则的定义
  * 5. 文档处理状态的定义
  * 6. 分布式锁的键定义
+ * 7. 应用配置和状态的定义
  *
  * 主要组件：
  * - 图片上传配置：定义允许的图片格式和大小限制
@@ -16,6 +17,7 @@
  * - 文本处理规则：定义默认的文本预处理和分段规则
  * - 文档状态：定义文档处理流程中的各种状态
  * - 分布式锁：定义用于并发控制的锁键
+ * - 应用配置：定义应用的默认配置和状态
  *
  * @module entity
  */
@@ -288,3 +290,118 @@ export const LOCK_KEYWORD_TABLE_UPDATE_KEYWORD_TABLE =
  */
 export const LOCK_SEGMENT_UPDATE_ENABLED =
   'lock:segment:update:enabled_{segment_id}';
+
+/**
+ * 应用配置类型枚举
+ * 定义了应用配置的两种状态：
+ * - DRAFT: 草稿状态，表示配置尚未发布
+ * - PUBLISHED: 已发布状态，表示配置已经发布并生效
+ */
+export enum AppConfigType {
+  DRAFT = 'draft',
+  PUBLISHED = 'published',
+}
+
+/**
+ * 默认应用配置
+ * 定义了应用的默认配置参数，包括：
+ * - modelConfig: 模型配置（提供商、模型名称、参数等）
+ * - dialogRound: 对话轮次限制
+ * - presetPrompt: 预设提示词
+ * - tools: 可用工具列表
+ * - workflows: 工作流配置
+ * - datasets: 数据集配置
+ * - retrievalConfig: 检索配置
+ * - longTermMemory: 长期记忆配置
+ * - openingStatement: 开场白
+ * - openingQuestions: 开场问题列表
+ * - speechToText: 语音转文字配置
+ * - textToSpeech: 文字转语音配置
+ * - reviewConfig: 审核配置
+ * - suggestedAfterAnswer: 回答后建议配置
+ */
+export const DEFAULT_APP_CONFIG = {
+  modelConfig: {
+    provider: 'openai',
+    model: 'gpt-4o-mini',
+    parameters: {
+      temperature: 0.5,
+      topP: 0.85,
+      frequencyPenalty: 0.2,
+      presencePenalty: 0.2,
+      maxTokens: 8192,
+    },
+  },
+  dialogRound: 3,
+  presetPrompt: '',
+  tools: [],
+  workflows: [],
+  datasets: [],
+  retrievalConfig: {
+    retrievalStrategy: 'semantic',
+    k: 10,
+    score: 0.5,
+  },
+  longTermMemory: {
+    enable: false,
+  },
+  openingStatement: '',
+  openingQuestions: [],
+  speechToText: {
+    enable: false,
+  },
+  textToSpeech: {
+    enable: false,
+    voice: 'echo',
+    auto_play: false,
+  },
+  reviewConfig: {
+    enable: false,
+    keywords: [],
+    inputs_config: {
+      enable: false,
+      presetResponse: '',
+    },
+    outputs_config: {
+      enable: false,
+    },
+  },
+  suggestedAfterAnswer: {
+    enable: true,
+  },
+};
+
+/**
+ * 应用状态枚举
+ * 定义了应用的两种状态：
+ * - DRAFT: 草稿状态，表示应用尚未发布
+ * - PUBLISHED: 已发布状态，表示应用已经发布并可用
+ */
+export enum AppStatus {
+  DRAFT = 'draft',
+  PUBLISHED = 'published',
+}
+
+/**
+ * 模型配置类型定义
+ * 定义了模型配置的结构，包括：
+ * - provider: 模型提供商
+ * - model: 模型名称
+ * - parameters: 模型参数配置
+ *   - temperature: 温度参数，控制输出的随机性
+ *   - topP: 核采样参数，控制输出的多样性
+ *   - frequencyPenalty: 频率惩罚参数，控制重复内容的生成
+ *   - presencePenalty: 存在惩罚参数，控制主题的重复
+ *   - maxTokens: 最大生成令牌数
+ */
+export type ModelConfig = {
+  provider: string;
+  model: string;
+  parameters: {
+    temperature: number;
+    topP: number;
+    frequencyPenalty: number;
+    presencePenalty: number;
+    maxTokens: number;
+  };
+};

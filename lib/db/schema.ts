@@ -3,13 +3,13 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgTable,
+  real,
   text,
   timestamp,
   unique,
   uuid,
-  numeric,
-  real,
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
@@ -350,8 +350,12 @@ export const appDatasetJoin = pgTable(
   'app_dataset_join',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    appId: text('app_id').notNull(),
-    datasetId: text('dataset_id').notNull(),
+    appId: uuid('app_id')
+      .notNull()
+      .references(() => app.id, { onDelete: 'cascade' }),
+    datasetId: uuid('dataset_id')
+      .notNull()
+      .references(() => dataset.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at')
       .notNull()
@@ -407,6 +411,7 @@ export const appConfigVersion = pgTable(
     presetPrompt: text('preset_prompt').notNull().default(''),
     tools: jsonb('tools').notNull().default('[]'),
     workflows: jsonb('workflows').notNull().default('[]'),
+    datasets: jsonb('datasets').notNull().default('[]'),
     retrievalConfig: jsonb('retrieval_config').notNull().default('[]'),
     longTermMemory: jsonb('long_term_memory').notNull().default('{}'),
     openingStatement: text('opening_statement').notNull().default(''),

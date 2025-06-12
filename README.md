@@ -73,6 +73,11 @@
   - `/api/user/password` - 修改密码
   - `/api/user/avatar` - 更新头像
 
+- `/api/apps` - 应用管理相关接口
+  - `/api/apps` - 创建应用和获取应用列表
+  - `/api/apps/:appId` - 获取、更新和删除特定应用
+  - `/api/apps/:appId/copy` - 复制现有应用
+
 - `/api/openapi` - OpenAPI 相关接口
   - `/api/openapi/chat` - 聊天功能接口
   - `/api/openapi/api-keys` - API 密钥管理

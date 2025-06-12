@@ -368,7 +368,7 @@ export const appConfig = pgTable(
   'app_config',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    appId: text('app_id')
+    appId: uuid('app_id')
       .notNull()
       .references(() => app.id, { onDelete: 'cascade' }),
     modelConfig: jsonb('model_config').notNull().default('{}'),
@@ -399,7 +399,7 @@ export const appConfigVersion = pgTable(
   'app_config_version',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    appId: text('app_id')
+    appId: uuid('app_id')
       .notNull()
       .references(() => app.id, { onDelete: 'cascade' }),
     modelConfig: jsonb('model_config').notNull().default('{}'),
@@ -438,7 +438,7 @@ export const conversation = pgTable(
   'conversation',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    appId: text('app_id')
+    appId: uuid('app_id')
       .notNull()
       .references(() => app.id, { onDelete: 'cascade' }),
     name: text('name').notNull().default(''),
@@ -460,10 +460,10 @@ export const message = pgTable(
   'message',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    appId: text('app_id')
+    appId: uuid('app_id')
       .notNull()
       .references(() => app.id, { onDelete: 'cascade' }),
-    conversationId: text('conversation_id')
+    conversationId: uuid('conversation_id')
       .notNull()
       .references(() => conversation.id, { onDelete: 'cascade' }),
     invokeFrom: text('invoke_from').notNull().default(''),
@@ -526,13 +526,13 @@ export const messageAgentThought = pgTable(
   'message_agent_thought',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    appId: text('app_id')
+    appId: uuid('app_id')
       .notNull()
       .references(() => app.id, { onDelete: 'cascade' }),
-    conversationId: text('conversation_id')
+    conversationId: uuid('conversation_id')
       .notNull()
       .references(() => conversation.id, { onDelete: 'cascade' }),
-    messageId: text('message_id')
+    messageId: uuid('message_id')
       .notNull()
       .references(() => message.id, { onDelete: 'cascade' }),
     invokeFrom: text('invoke_from').notNull().default(''),

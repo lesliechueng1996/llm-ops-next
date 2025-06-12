@@ -85,6 +85,13 @@
       "when": 1749484749362,
       "tag": "0011_heavy_miek",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1749727438558,
+      "tag": "0012_vengeful_trish_tilby",
+      "breakpoints": true
     }
   ]
 }

@@ -9,6 +9,7 @@
  * 5. 文档处理状态的定义
  * 6. 分布式锁的键定义
  * 7. 应用配置和状态的定义
+ * 8. 调用来源的定义
  *
  * 主要组件：
  * - 图片上传配置：定义允许的图片格式和大小限制
@@ -18,6 +19,7 @@
  * - 文档状态：定义文档处理流程中的各种状态
  * - 分布式锁：定义用于并发控制的锁键
  * - 应用配置：定义应用的默认配置和状态
+ * - 调用来源：定义系统调用的不同来源（服务 API、Web 应用、调试器）
  *
  * @module entity
  */
@@ -303,6 +305,77 @@ export enum AppConfigType {
 }
 
 /**
+ * 模型配置类型定义
+ * 定义了模型配置的结构，包括：
+ * - provider: 模型提供商
+ * - model: 模型名称
+ * - parameters: 模型参数配置
+ *   - temperature: 温度参数，控制输出的随机性
+ *   - topP: 核采样参数，控制输出的多样性
+ *   - frequencyPenalty: 频率惩罚参数，控制重复内容的生成
+ *   - presencePenalty: 存在惩罚参数，控制主题的重复
+ *   - maxTokens: 最大生成令牌数
+ */
+export type ModelConfig = {
+  provider: string;
+  model: string;
+  parameters: {
+    temperature: number;
+    topP: number;
+    frequencyPenalty: number;
+    presencePenalty: number;
+    maxTokens: number;
+  };
+};
+
+export type DraftAppConfig = {
+  modelConfig: ModelConfig;
+  dialogRound: number;
+  presetPrompt: string;
+  tools: Array<{
+    type: 'builtin_tool' | 'api_tool';
+    providerId: string;
+    toolId: string;
+    params: Record<string, unknown>;
+  }>;
+  // TODO: add workflows definition
+  workflows: unknown;
+  datasets: Array<string>;
+  retrievalConfig: {
+    retrievalStrategy: 'full_text' | 'semantic' | 'hybrid';
+    k: number;
+    score: number;
+  };
+  longTermMemory: {
+    enable: boolean;
+  };
+  openingStatement: string;
+  openingQuestions: Array<string>;
+  speechToText: {
+    enable: boolean;
+  };
+  textToSpeech: {
+    enable: boolean;
+    autoPlay: boolean;
+    voice: 'echo';
+  };
+  reviewConfig: {
+    enable: boolean;
+    keywords: Array<string>;
+    inputsConfig: {
+      enable: boolean;
+      presetResponse: string;
+    };
+    outputsConfig: {
+      enable: boolean;
+    };
+  };
+  suggestedAfterAnswer: {
+    enable: boolean;
+  };
+};
+
+/**
  * 默认应用配置
  * 定义了应用的默认配置参数，包括：
  * - modelConfig: 模型配置（提供商、模型名称、参数等）
@@ -320,7 +393,7 @@ export enum AppConfigType {
  * - reviewConfig: 审核配置
  * - suggestedAfterAnswer: 回答后建议配置
  */
-export const DEFAULT_APP_CONFIG = {
+export const DEFAULT_APP_CONFIG: DraftAppConfig = {
   modelConfig: {
     provider: 'openai',
     model: 'gpt-4o-mini',
@@ -353,16 +426,16 @@ export const DEFAULT_APP_CONFIG = {
   textToSpeech: {
     enable: false,
     voice: 'echo',
-    auto_play: false,
+    autoPlay: false,
   },
   reviewConfig: {
     enable: false,
     keywords: [],
-    inputs_config: {
+    inputsConfig: {
       enable: false,
       presetResponse: '',
     },
-    outputs_config: {
+    outputsConfig: {
       enable: false,
     },
   },
@@ -383,25 +456,19 @@ export enum AppStatus {
 }
 
 /**
- * 模型配置类型定义
- * 定义了模型配置的结构，包括：
- * - provider: 模型提供商
- * - model: 模型名称
- * - parameters: 模型参数配置
- *   - temperature: 温度参数，控制输出的随机性
- *   - topP: 核采样参数，控制输出的多样性
- *   - frequencyPenalty: 频率惩罚参数，控制重复内容的生成
- *   - presencePenalty: 存在惩罚参数，控制主题的重复
- *   - maxTokens: 最大生成令牌数
+ * 调用来源枚举
+ * 定义了系统调用的不同来源：
+ * - SERVICE_API: 服务 API 调用
+ * - WEB_APP: Web 应用调用
+ * - DEBUGGER: 调试器调用
+ *
+ * @enum {string}
  */
-export type ModelConfig = {
-  provider: string;
-  model: string;
-  parameters: {
-    temperature: number;
-    topP: number;
-    frequencyPenalty: number;
-    presencePenalty: number;
-    maxTokens: number;
-  };
-};
+export enum InvokeFrom {
+  /** 服务 API 调用 */
+  SERVICE_API = 'service_api',
+  /** Web 应用调用 */
+  WEB_APP = 'web_app',
+  /** 调试器调用 */
+  DEBUGGER = 'debugger',
+}

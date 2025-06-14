@@ -1,7 +1,17 @@
 /**
  * 工具模块主文件
- * 该文件定义了系统中所有内置工具的类型和配置
- * 包括搜索、图片生成、天气查询等功能性工具
+ *
+ * 该模块定义了系统中所有内置工具的类型和配置，包括：
+ * - 工具分类系统
+ * - 工具参数类型定义
+ * - 内置工具配置
+ * - 工具获取和查询函数
+ *
+ * 主要功能：
+ * 1. 提供统一的工具类型定义
+ * 2. 管理工具分类
+ * 3. 配置内置工具（如搜索、图片生成、天气查询等）
+ * 4. 提供工具查询和获取接口
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
@@ -25,9 +35,9 @@ const host = process.env.LLM_OPS_NEXT_HOST;
 
 /**
  * 工具分类类型定义
- * @property category - 分类标识符
- * @property name - 分类显示名称
- * @property icon - 分类图标URL
+ * @property category - 分类的唯一标识符，用于系统内部引用
+ * @property name - 分类的显示名称，用于用户界面展示
+ * @property icon - 分类图标的URL地址
  */
 type Category = {
   category: string;
@@ -37,7 +47,12 @@ type Category = {
 
 /**
  * 系统预定义的工具分类列表
- * 包括：搜索、图片、天气、工具和其他类别
+ * 定义了系统中所有可用的工具分类，包括：
+ * - 搜索类工具
+ * - 图片处理工具
+ * - 天气相关工具
+ * - 通用工具
+ * - 其他类别工具
  */
 export const categories: Category[] = [
   {
@@ -70,6 +85,10 @@ export const categories: Category[] = [
 /**
  * 工具参数基础类型
  * 定义了所有工具参数共享的基本属性
+ * @property name - 参数的唯一标识符
+ * @property label - 参数的显示名称
+ * @property help - 参数的帮助说明文本
+ * @property required - 参数是否必填
  */
 type BuiltinToolBaseParam = {
   name: string;
@@ -81,6 +100,9 @@ type BuiltinToolBaseParam = {
 /**
  * 选择类型参数配置
  * 用于定义下拉选择框类型的参数
+ * @property type - 固定为'select'
+ * @property default - 默认选中的值
+ * @property options - 可选项列表，每个选项包含值和显示标签
  */
 type BuiltinToolSelectParam = BuiltinToolBaseParam & {
   type: 'select';
@@ -94,6 +116,10 @@ type BuiltinToolSelectParam = BuiltinToolBaseParam & {
 /**
  * 数字类型参数配置
  * 用于定义数字输入类型的参数
+ * @property type - 固定为'number'
+ * @property default - 默认数值
+ * @property min - 可选的最小值
+ * @property max - 可选的最大值
  */
 type BuiltinToolNumberParam = BuiltinToolBaseParam & {
   type: 'number';
@@ -105,6 +131,8 @@ type BuiltinToolNumberParam = BuiltinToolBaseParam & {
 /**
  * 布尔类型参数配置
  * 用于定义开关类型的参数
+ * @property type - 固定为'boolean'
+ * @property default - 默认开关状态
  */
 type BuiltinToolBooleanParam = BuiltinToolBaseParam & {
   type: 'boolean';
@@ -114,6 +142,8 @@ type BuiltinToolBooleanParam = BuiltinToolBaseParam & {
 /**
  * 字符串类型参数配置
  * 用于定义文本输入类型的参数
+ * @property type - 固定为'string'
+ * @property default - 默认文本值
  */
 type BuiltinToolStringParam = BuiltinToolBaseParam & {
   type: 'string';
@@ -122,7 +152,7 @@ type BuiltinToolStringParam = BuiltinToolBaseParam & {
 
 /**
  * 工具参数联合类型
- * 包含所有可能的参数类型
+ * 包含所有可能的参数类型，用于工具配置
  */
 type BuiltinToolParam =
   | BuiltinToolSelectParam
@@ -133,6 +163,14 @@ type BuiltinToolParam =
 /**
  * 内置工具类型定义
  * 定义了工具的基本信息和配置
+ * @property name - 工具的唯一标识符
+ * @property label - 工具的显示名称
+ * @property description - 工具的功能描述
+ * @property icon - 工具的图标URL
+ * @property category - 工具所属分类
+ * @property createdAt - 工具创建时间戳
+ * @property background - 工具背景色
+ * @property tools - 工具的具体实现列表
  */
 type BuiltinTool = {
   name: string;
@@ -160,7 +198,13 @@ type BuiltinTool = {
 
 /**
  * 系统内置工具列表
- * 包含所有预配置的工具，如DuckDuckGo搜索、DALL-E图片生成等
+ * 包含所有预配置的工具，每个工具都包含完整的配置信息
+ * 当前支持的工具：
+ * - DuckDuckGo搜索
+ * - DALL-E图片生成
+ * - 维基百科查询
+ * - 时间工具
+ * - 高德工具包（天气和IP查询）
  */
 export const builtinTools: BuiltinTool[] = [
   {
@@ -243,3 +287,24 @@ export const builtinTools: BuiltinTool[] = [
     ],
   },
 ];
+
+/**
+ * 根据提供者名称获取内置工具提供者配置
+ * @param providerName - 工具提供者的唯一标识符
+ * @returns 找到的工具提供者配置，如果未找到则返回undefined
+ */
+export const getBuiltinToolProvider = (providerName: string) => {
+  return builtinTools.find(
+    (toolProvider) => toolProvider.name === providerName,
+  );
+};
+
+/**
+ * 从指定的工具提供者中获取特定工具
+ * @param provider - 工具提供者配置
+ * @param toolName - 要获取的工具名称
+ * @returns 找到的工具配置，如果未找到则返回undefined
+ */
+export const getBuiltinTool = (provider: BuiltinTool, toolName: string) => {
+  return provider.tools.find((tool) => tool.name === toolName);
+};

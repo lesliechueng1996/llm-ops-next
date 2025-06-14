@@ -6,11 +6,17 @@
  * - 应用列表的分页查询
  * - 应用基本信息的获取和更新
  * - 应用配置的管理
+ * - 应用对话摘要的获取和更新
  */
 
-import { NotFoundException } from '@/exceptions';
+import { BadRequestException, NotFoundException } from '@/exceptions';
 import { db } from '@/lib/db';
-import { app, appConfig, appConfigVersion } from '@/lib/db/schema';
+import {
+  app,
+  appConfig,
+  appConfigVersion,
+  conversation,
+} from '@/lib/db/schema';
 import {
   AppConfigType,
   AppStatus,
@@ -21,7 +27,9 @@ import { log } from '@/lib/logger';
 import { calculatePagination, paginationResult } from '@/lib/paginator';
 import type { CreateAppReq, UpdateAppReq } from '@/schemas/app-schema';
 import type { SearchPageReq } from '@/schemas/common-schema';
-import { and, count, desc, eq, inArray, like } from 'drizzle-orm';
+import { getDraftAppConfigFromDBOrThrow } from '@/services/app-config';
+import { getOrCreateDebugConversation } from '@/services/conversation';
+import { and, count, desc, eq, inArray, like, sum } from 'drizzle-orm';
 
 /**
  * 获取应用记录，如果不存在则抛出异常
@@ -30,7 +38,7 @@ import { and, count, desc, eq, inArray, like } from 'drizzle-orm';
  * @returns 应用记录
  * @throws NotFoundException 当应用不存在时
  */
-const getAppOrThrow = async (appId: string, userId: string) => {
+export const getAppOrThrow = async (appId: string, userId: string) => {
   const appRecords = await db
     .select()
     .from(app)
@@ -340,4 +348,54 @@ export const updateAppBasicInfo = async (
       description: req.description ?? '',
     })
     .where(eq(app.id, appId));
+};
+
+/**
+ * 获取应用的对话摘要
+ * 该功能需要应用配置中启用长期记忆功能
+ * @param appId - 应用ID
+ * @param userId - 用户ID
+ * @returns 应用的对话摘要
+ * @throws BadRequestException 当应用未启用长期记忆功能时
+ * @throws NotFoundException 当应用不存在时
+ */
+export const getAppSummary = async (appId: string, userId: string) => {
+  const appRecord = await getAppOrThrow(appId, userId);
+  const draftAppConfig = await getDraftAppConfigFromDBOrThrow(appRecord);
+  if (!draftAppConfig.longTermMemory.enable) {
+    throw new BadRequestException('应用配置中未启用长期记忆');
+  }
+
+  const debugConversationId = appRecord.debugConversationId;
+  const conversationRecord = await getOrCreateDebugConversation(
+    debugConversationId,
+    appId,
+    userId,
+  );
+
+  return conversationRecord.summary;
+};
+
+/**
+ * 更新应用的对话摘要
+ * @param appId - 应用ID
+ * @param userId - 用户ID
+ * @param summary - 新的对话摘要内容
+ * @throws NotFoundException 当应用不存在时
+ */
+export const updateAppSummary = async (
+  appId: string,
+  userId: string,
+  summary: string,
+) => {
+  const appRecord = await getAppOrThrow(appId, userId);
+  const conversationRecord = await getOrCreateDebugConversation(
+    appRecord.debugConversationId,
+    appId,
+    userId,
+  );
+  await db
+    .update(conversation)
+    .set({ summary })
+    .where(eq(conversation.id, conversationRecord.id));
 };

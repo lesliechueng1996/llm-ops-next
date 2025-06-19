@@ -26,6 +26,7 @@
 - **对象存储**: 腾讯云 COS
 - **AI 集成**:
   - LangChain
+  - LangGraph
   - OpenAI
   - Alibaba 通义千问（嵌入模型）
   - Weaviate（向量数据库）
@@ -56,6 +57,12 @@
   - DuckDuckGo 搜索
   - DALL-E 图像生成
   - 时间查询
+- AI 应用调试功能
+  - 实时流式调试对话
+  - 任务中断和资源清理
+  - 代理思考过程记录
+  - 长期记忆管理
+  - 数据集查询记录追踪
 
 ## API 文档
 
@@ -79,6 +86,8 @@
   - `/api/apps/:appId/copy` - 复制现有应用
   - `/api/apps/:appId/draft-app-config` - 获取和更新应用的草稿配置信息
   - `/api/apps/:appId/summary` - 获取和更新应用的调试长记忆内容
+  - `/api/apps/:appId/conversations` - 应用调试对话（流式事件响应）
+  - `/api/apps/:appId/conversations/tasks/:taskId/stop` - 停止应用调试对话任务
 
 - `/api/openapi` - OpenAPI 相关接口
   - `/api/openapi/chat` - 聊天功能接口
@@ -181,10 +190,16 @@ bun run start
 ├── app/            # Next.js 应用路由
 ├── components/     # React 组件
 ├── lib/           # 工具函数和配置
+│   ├── agent/           # AI 代理相关功能
+│   │   ├── entity.ts           # 代理实体定义
+│   │   ├── event-processor.ts  # 事件处理器
+│   │   ├── function-call-agent.ts # 函数调用代理
+│   │   └── helper.ts           # 代理辅助函数
 │   ├── embedding/         # 嵌入与缓存模块（阿里云+Redis）
 │   ├── vector-store/      # Weaviate 向量存储集成
 │   ├── keyword/           # 关键词抽取模块
 │   ├── text-splitter/     # 文本分割与清洗
+│   ├── memory/            # 记忆管理模块
 │   └── ...
 ├── public/        # 静态资源
 ├── schemas/       # 数据模型和验证

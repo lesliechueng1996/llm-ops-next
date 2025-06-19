@@ -11,7 +11,7 @@
  * @module conversation
  */
 
-import { QueueEvent, type AgentThought } from '@/lib/agent/entity';
+import { type AgentThought, QueueEvent } from '@/lib/agent/entity';
 import { db } from '@/lib/db';
 import {
   app,

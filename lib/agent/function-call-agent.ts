@@ -11,34 +11,34 @@
  * 智能体使用 LangGraph 状态图来管理执行流程，支持流式响应和事件发射。
  */
 
+import { randomUUID } from 'node:crypto';
+import { InternalServerErrorException } from '@/exceptions';
+import { DATASET_RETRIEVAL_TOOL_NAME } from '@/lib/entity';
+import { log } from '@/lib/logger';
 import type { BaseLanguageModel } from '@langchain/core/language_models/base';
-import {
-  type AgentConfig,
-  AgentState,
-  type AgentStateType,
-  defaultAgentConfig,
-  createAgentThought,
-  QueueEvent,
-  AGENT_SYSTEM_PROMPT_TEMPLATE,
-  createErrorAgentThought,
-  MAX_ITERATION_RESPONSE,
-} from './entity';
-import { StateGraph, START, END } from '@langchain/langgraph';
+import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import {
   AIMessage,
   type AIMessageChunk,
   HumanMessage,
-  isAIMessage,
   RemoveMessage,
   SystemMessage,
   ToolMessage,
+  isAIMessage,
 } from '@langchain/core/messages';
-import { randomUUID } from 'node:crypto';
-import { log } from '@/lib/logger';
-import { InternalServerErrorException } from '@/exceptions';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import type { StructuredTool } from '@langchain/core/tools';
-import { DATASET_RETRIEVAL_TOOL_NAME } from '@/lib/entity';
+import { END, START, StateGraph } from '@langchain/langgraph';
+import {
+  AGENT_SYSTEM_PROMPT_TEMPLATE,
+  type AgentConfig,
+  AgentState,
+  type AgentStateType,
+  MAX_ITERATION_RESPONSE,
+  QueueEvent,
+  createAgentThought,
+  createErrorAgentThought,
+  defaultAgentConfig,
+} from './entity';
 import { stopCondition, withStopCheck } from './helper';
 
 /**

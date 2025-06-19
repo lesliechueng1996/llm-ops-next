@@ -10,16 +10,17 @@
  * - 应用调试聊天功能
  */
 
+import { randomUUID } from 'node:crypto';
 import { BadRequestException, NotFoundException } from '@/exceptions';
+import {
+  type AgentThought,
+  QueueEvent,
+  createAgentConfig,
+} from '@/lib/agent/entity';
 import {
   createEventProcessor,
   wrapEmitWithPing,
 } from '@/lib/agent/event-processor';
-import {
-  type AgentThought,
-  createAgentConfig,
-  QueueEvent,
-} from '@/lib/agent/entity';
 import { createFunctionCallAgent } from '@/lib/agent/function-call-agent';
 import {
   clearTaskBelongCache,
@@ -62,7 +63,6 @@ import {
 import { HumanMessage } from '@langchain/core/messages';
 import { ChatOpenAI } from '@langchain/openai';
 import { and, count, desc, eq, inArray, like, sum } from 'drizzle-orm';
-import { randomUUID } from 'node:crypto';
 
 /**
  * 获取应用记录，如果不存在则抛出异常

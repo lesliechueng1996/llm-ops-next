@@ -7,15 +7,15 @@
  * @module agent/entity
  */
 
+import { randomUUID } from 'node:crypto';
 import {
   DEFAULT_APP_CONFIG,
-  InvokeFrom,
   type DraftAppConfig,
+  InvokeFrom,
 } from '@/lib/entity';
-import { Annotation, MessagesAnnotation } from '@langchain/langgraph';
-import type { StructuredTool } from '@langchain/core/tools';
 import type { BaseMessage, StoredMessage } from '@langchain/core/messages';
-import { randomUUID } from 'node:crypto';
+import type { StructuredTool } from '@langchain/core/tools';
+import { Annotation, MessagesAnnotation } from '@langchain/langgraph';
 
 /**
  * 智能体系统提示模板

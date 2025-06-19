@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
+import { log } from '@/lib/logger';
 import {
-  createAgentThought,
+  type AgentThought,
   QueueEvent,
   TASK_TIMEOUT,
-  type AgentThought,
+  createAgentThought,
 } from './entity';
-import { log } from '@/lib/logger';
 
 /**
  * 事件处理器函数类型定义

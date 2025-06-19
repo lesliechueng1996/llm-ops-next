@@ -9,16 +9,16 @@
  * 使用 Redis 来管理任务的停止状态，支持跨进程的任务控制。
  */
 
+import { randomUUID } from 'node:crypto';
+import { InvokeFrom } from '@/lib/entity';
 import { redisClient } from '@/lib/redis';
+import { END } from '@langchain/langgraph';
 import {
-  createAgentThought,
+  type AgentStateType,
   QueueEvent,
   TASK_TIMEOUT,
-  type AgentStateType,
+  createAgentThought,
 } from './entity';
-import { randomUUID } from 'node:crypto';
-import { END } from '@langchain/langgraph';
-import { InvokeFrom } from '@/lib/entity';
 
 /** Redis 中存储任务停止状态的键模板 */
 const TASK_STOP_KEY = 'generate_task_stopped:{task_id}';

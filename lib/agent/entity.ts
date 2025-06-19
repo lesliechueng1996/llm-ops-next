@@ -283,3 +283,6 @@ export const createErrorAgentThought = (taskId: string, error: Error) => {
  */
 export const MAX_ITERATION_RESPONSE =
   '对不起，我已经尽力了，但是还是无法回答您的问题。';
+
+// 超时时间（毫秒）- 10分钟
+export const TASK_TIMEOUT = 600000;

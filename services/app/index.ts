@@ -21,6 +21,12 @@ import {
   QueueEvent,
 } from '@/lib/agent/entity';
 import { createFunctionCallAgent } from '@/lib/agent/function-call-agent';
+import {
+  clearTaskBelongCache,
+  doTaskBelongCheck,
+  setStopFlag,
+  setTaskBelongCache,
+} from '@/lib/agent/helper';
 import { db } from '@/lib/db';
 import {
   app,
@@ -655,6 +661,8 @@ export const debugChat = async (
       );
     });
 
+    // 设置任务归属缓存
+    await setTaskBelongCache(taskId, InvokeFrom.DEBUGGER, userId);
     // 调用代理处理用户查询，传入历史对话和长期记忆
     await agent.invoke({
       messages: [new HumanMessage(query)], // 当前用户查询
@@ -676,9 +684,23 @@ export const debugChat = async (
       Array.from(agentThoughts.values()), // 转换为数组
     );
   } finally {
-    // 清理资源：停止ping发射器和关闭写入流
+    // 清理资源：停止ping发射器, 关闭写入流, 清除任务归属缓存
     log.info('Agent stop');
     pingEmitter.stop();
     writer.close();
+    await clearTaskBelongCache(taskId);
   }
+};
+
+export const stopConversationTask = async (
+  appId: string,
+  taskId: string,
+  userId: string,
+) => {
+  await getAppOrThrow(appId, userId);
+  const isBelong = await doTaskBelongCheck(taskId, InvokeFrom.DEBUGGER, userId);
+  if (!isBelong) {
+    throw new BadRequestException('任务不属于当前用户');
+  }
+  await setStopFlag(taskId);
 };

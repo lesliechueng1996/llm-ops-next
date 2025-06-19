@@ -1,5 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import { createAgentThought, QueueEvent, type AgentThought } from './entity';
+import {
+  createAgentThought,
+  QueueEvent,
+  TASK_TIMEOUT,
+  type AgentThought,
+} from './entity';
 import { log } from '@/lib/logger';
 
 /**
@@ -50,8 +55,6 @@ export const createEventProcessor = () => {
 
 // 心跳间隔时间（毫秒）
 const PING_INTERVAL = 10000;
-// 超时时间（毫秒）- 10分钟
-const TIMEOUT = 600000;
 
 /**
  * 为事件发射器添加心跳和超时监控功能
@@ -93,7 +96,7 @@ export const wrapEmitWithPing = (
         event: QueueEvent.TIMEOUT,
       }),
     );
-  }, TIMEOUT);
+  }, TASK_TIMEOUT);
 
   // 设置心跳定时器
   const interval = setInterval(() => {

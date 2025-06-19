@@ -53,7 +53,7 @@ const OPTIMIZE_PROMPT_TEMPLATE = `# 角色
 export const optimizePrompt = async (prompt: string) => {
   const promptTemplate = ChatPromptTemplate.fromMessages([
     ['system', OPTIMIZE_PROMPT_TEMPLATE],
-    ['user', '{prompt}'],
+    ['human', '{prompt}'],
   ]);
 
   const llm = new ChatOpenAI({

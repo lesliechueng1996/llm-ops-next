@@ -328,49 +328,119 @@ export type ModelConfig = {
   };
 };
 
+/**
+ * 检索策略枚举
+ * 定义了文档检索的不同策略：
+ * - FULL_TEXT: 全文检索，基于关键词匹配进行检索
+ * - SEMANTIC: 语义检索，基于向量相似度进行检索
+ * - HYBRID: 混合检索，结合全文检索和语义检索的结果
+ *
+ * @enum {string}
+ */
+export enum RetrievalStrategy {
+  /** 全文检索策略 */
+  FULL_TEXT = 'full_text',
+  /** 语义检索策略 */
+  SEMANTIC = 'semantic',
+  /** 混合检索策略 */
+  HYBRID = 'hybrid',
+}
+
+/**
+ * 草稿应用配置类型定义
+ * 定义了应用在草稿状态下的完整配置结构，包括：
+ * - modelConfig: 模型配置，包含提供商、模型名称和参数设置
+ * - dialogRound: 对话轮次限制，控制单次对话的最大轮数
+ * - presetPrompt: 预设提示词，用于初始化对话的上下文
+ * - tools: 可用工具列表，包含内置工具和 API 工具的配置
+ * - workflows: 工作流配置（待实现）
+ * - datasets: 数据集配置，指定可用的知识库数据集
+ * - retrievalConfig: 检索配置，包含检索策略和相关参数
+ * - longTermMemory: 长期记忆配置，控制是否启用长期记忆功能
+ * - openingStatement: 开场白，应用启动时显示的消息
+ * - openingQuestions: 开场问题列表，为用户提供引导性问题
+ * - speechToText: 语音转文字配置，控制语音输入功能
+ * - textToSpeech: 文字转语音配置，控制语音输出功能
+ * - reviewConfig: 审核配置，包含输入输出审核的相关设置
+ * - suggestedAfterAnswer: 回答后建议配置，控制是否显示后续建议
+ */
 export type DraftAppConfig = {
+  /** 模型配置 */
   modelConfig: ModelConfig;
+  /** 对话轮次限制 */
   dialogRound: number;
+  /** 预设提示词 */
   presetPrompt: string;
+  /** 可用工具列表 */
   tools: Array<{
+    /** 工具类型：内置工具或 API 工具 */
     type: 'builtin_tool' | 'api_tool';
+    /** 提供商 ID */
     providerId: string;
+    /** 工具 ID */
     toolId: string;
+    /** 工具参数 */
     params: Record<string, unknown>;
   }>;
+  /** 工作流配置（待实现） */
   // TODO: add workflows definition
   workflows: unknown;
+  /** 数据集配置 */
   datasets: Array<string>;
+  /** 检索配置 */
   retrievalConfig: {
-    retrievalStrategy: 'full_text' | 'semantic' | 'hybrid';
+    /** 检索策略 */
+    retrievalStrategy: RetrievalStrategy;
+    /** 检索结果数量限制 */
     k: number;
+    /** 相似度分数阈值 */
     score: number;
   };
+  /** 长期记忆配置 */
   longTermMemory: {
+    /** 是否启用长期记忆 */
     enable: boolean;
   };
+  /** 开场白 */
   openingStatement: string;
+  /** 开场问题列表 */
   openingQuestions: Array<string>;
+  /** 语音转文字配置 */
   speechToText: {
+    /** 是否启用语音转文字 */
     enable: boolean;
   };
+  /** 文字转语音配置 */
   textToSpeech: {
+    /** 是否启用文字转语音 */
     enable: boolean;
+    /** 是否自动播放 */
     autoPlay: boolean;
+    /** 语音类型 */
     voice: 'echo';
   };
+  /** 审核配置 */
   reviewConfig: {
+    /** 是否启用审核 */
     enable: boolean;
+    /** 关键词列表 */
     keywords: Array<string>;
+    /** 输入审核配置 */
     inputsConfig: {
+      /** 是否启用输入审核 */
       enable: boolean;
+      /** 预设响应 */
       presetResponse: string;
     };
+    /** 输出审核配置 */
     outputsConfig: {
+      /** 是否启用输出审核 */
       enable: boolean;
     };
   };
+  /** 回答后建议配置 */
   suggestedAfterAnswer: {
+    /** 是否启用回答后建议 */
     enable: boolean;
   };
 };
@@ -411,7 +481,7 @@ export const DEFAULT_APP_CONFIG: DraftAppConfig = {
   workflows: [],
   datasets: [],
   retrievalConfig: {
-    retrievalStrategy: 'semantic',
+    retrievalStrategy: RetrievalStrategy.SEMANTIC,
     k: 10,
     score: 0.5,
   },
@@ -472,3 +542,49 @@ export enum InvokeFrom {
   /** 调试器调用 */
   DEBUGGER = 'debugger',
 }
+
+/**
+ * 消息状态枚举
+ * 定义了消息在处理过程中可能处于的各种状态：
+ * - NORMAL: 正常状态，消息处理成功
+ * - ERROR: 错误状态，消息处理过程中发生错误
+ * - STOP: 停止状态，消息处理被手动停止
+ * - TIMEOUT: 超时状态，消息处理超时
+ *
+ * @enum {string}
+ */
+export enum MessageStatus {
+  /** 正常状态 */
+  NORMAL = 'normal',
+  /** 错误状态 */
+  ERROR = 'error',
+  /** 停止状态 */
+  STOP = 'stop',
+  /** 超时状态 */
+  TIMEOUT = 'timeout',
+}
+
+/**
+ * 检索来源枚举
+ * 定义了检索操作的不同来源：
+ * - HIT_TESTING: 命中测试，用于测试检索效果
+ * - APP: 应用调用，来自实际应用的检索请求
+ *
+ * @enum {string}
+ */
+export enum RetrievalSource {
+  /** 命中测试来源 */
+  HIT_TESTING = 'hit_testing',
+  /** 应用调用来源 */
+  APP = 'app',
+}
+
+/**
+ * 数据集检索工具名称常量
+ * 用于标识数据集检索功能的工具名称
+ * 在工具调用和配置中作为唯一标识符使用
+ *
+ * @constant
+ * @type {string}
+ */
+export const DATASET_RETRIEVAL_TOOL_NAME = 'dataset_retrieval';

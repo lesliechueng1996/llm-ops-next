@@ -8,6 +8,7 @@
  * - updateAppSummaryReqSchema: 更新应用摘要的请求验证
  */
 
+import { RetrievalStrategy } from '@/lib/entity';
 import { searchPageReqSchema } from '@/schemas/common-schema';
 import { z } from 'zod';
 
@@ -118,10 +119,17 @@ export const updateDraftAppConfigReqSchema = z
     workflows: z.any(),
     datasets: z.array(z.string()).max(5, '知识库数量超限: 最多支持5个知识库'),
     retrievalConfig: z.object({
-      retrievalStrategy: z.enum(['full_text', 'semantic', 'hybrid'], {
-        required_error: '检索策略无效: 仅支持全文、语义或混合检索',
-        invalid_type_error: '检索策略无效: 仅支持全文、语义或混合检索',
-      }),
+      retrievalStrategy: z.enum(
+        [
+          RetrievalStrategy.FULL_TEXT,
+          RetrievalStrategy.SEMANTIC,
+          RetrievalStrategy.HYBRID,
+        ],
+        {
+          required_error: '检索策略无效: 仅支持全文、语义或混合检索',
+          invalid_type_error: '检索策略无效: 仅支持全文、语义或混合检索',
+        },
+      ),
       k: z
         .number()
         .int()
@@ -236,4 +244,15 @@ export type UpdateDraftAppConfigReq = z.infer<
  */
 export const updateAppSummaryReqSchema = z.object({
   summary: z.string(),
+});
+
+/**
+ * 应用对话请求验证 schema
+ * @property {string} query - 用户问题
+ */
+export const appConversationReqSchema = z.object({
+  query: z
+    .string()
+    .min(1, '请输入用户问题')
+    .max(2000, '用户问题不能超过2000个字符'),
 });

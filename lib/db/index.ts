@@ -23,7 +23,7 @@ const db =
   globalForDrizzle.drizzleClient ||
   drizzle({
     connection: process.env.DATABASE_URL || '', // 从环境变量获取数据库连接 URL
-    logger: true, // 启用 SQL 查询日志
+    logger: false, // 启用 SQL 查询日志
   });
 
 // 在非生产环境中，将数据库连接实例保存到全局对象

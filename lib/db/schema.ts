@@ -598,3 +598,23 @@ export const messageAgentThought = pgTable(
     ),
   ],
 );
+
+export const datasetQuery = pgTable(
+  'dataset_query',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    datasetId: uuid('dataset_id')
+      .notNull()
+      .references(() => dataset.id, { onDelete: 'cascade' }),
+    query: text('query').notNull().default(''),
+    source: text('source').notNull().default(''),
+    sourceAppId: uuid('source_app_id'),
+    createdBy: text('created_by').notNull().default(''),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [index('idx_dataset_query_dataset_id').on(table.datasetId)],
+);

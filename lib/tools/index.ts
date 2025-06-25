@@ -154,7 +154,7 @@ type BuiltinToolStringParam = BuiltinToolBaseParam & {
  * 工具参数联合类型
  * 包含所有可能的参数类型，用于工具配置
  */
-type BuiltinToolParam =
+export type BuiltinToolParam =
   | BuiltinToolSelectParam
   | BuiltinToolNumberParam
   | BuiltinToolBooleanParam

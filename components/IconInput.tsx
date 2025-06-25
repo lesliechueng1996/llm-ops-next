@@ -6,6 +6,7 @@
  *
  * @component
  * @param {Object} props - 组件属性
+ * @param {string} [props.containerClassName] - 容器类名
  * @param {IconType} [props.leftIcon] - 左侧图标组件
  * @param {IconType} [props.rightIcon] - 右侧图标组件
  * @param {number} [props.iconSize=16] - 图标大小（像素）
@@ -31,6 +32,7 @@ import type { ComponentProps, MouseEventHandler } from 'react';
 
 // 组件属性类型定义
 type Props = ComponentProps<typeof Input> & {
+  containerClassName?: string;
   leftIcon?: IconType;
   rightIcon?: IconType;
   iconSize?: number;
@@ -40,6 +42,7 @@ type Props = ComponentProps<typeof Input> & {
 };
 
 const IconInput = ({
+  containerClassName,
   leftIcon: LeftIcon,
   rightIcon: RightIcon,
   iconSize = 16,
@@ -53,7 +56,7 @@ const IconInput = ({
   const iconSizeRem = iconSize / 16;
 
   return (
-    <div className="relative w-full">
+    <div className={cn('relative w-full', containerClassName)}>
       {/* 左侧图标按钮 */}
       {LeftIcon && (
         <button

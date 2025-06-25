@@ -13,6 +13,7 @@ import { auth } from '@/lib/auth/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 const AuthorizedLayout = async ({ children }: { children: ReactNode }) => {
   const session = await auth.api.getSession({
@@ -23,7 +24,11 @@ const AuthorizedLayout = async ({ children }: { children: ReactNode }) => {
     redirect('/login');
   }
 
-  return <main className="w-screen h-screen">{children}</main>;
+  return (
+    <main className="w-screen h-screen">
+      <NuqsAdapter>{children}</NuqsAdapter>
+    </main>
+  );
 };
 
 export default AuthorizedLayout;

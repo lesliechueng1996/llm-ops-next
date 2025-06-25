@@ -1,3 +1,9 @@
+import { verifyApiKey } from '@/lib/auth/dal';
+import { handleRouteError, successResult } from '@/lib/route-common';
+import { getDatasetQueries } from '@/services/dataset';
+
+type Params = { params: Promise<{ datasetId: string }> };
+
 /**
  * @swagger
  * /api/datasets/{datasetId}/queries:
@@ -51,6 +57,15 @@
  *                   type: string
  *                   example: ""
  */
-export async function GET() {
-  // TODO
+export async function GET(_: Request, { params }: Params) {
+  try {
+    const [{ userId }, { datasetId }] = await Promise.all([
+      verifyApiKey(),
+      params,
+    ]);
+    const queries = await getDatasetQueries(userId, datasetId);
+    return successResult(queries);
+  } catch (error) {
+    return handleRouteError(error);
+  }
 }

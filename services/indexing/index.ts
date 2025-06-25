@@ -21,6 +21,7 @@
 import { randomUUID } from 'node:crypto';
 import { db } from '@/lib/db';
 import {
+  datasetQuery,
   document,
   keywordTable,
   processRule,
@@ -655,4 +656,40 @@ export const deleteDocument = async (
     ),
     deleteKeywordTableFromSegmentIds(datasetId, segmentIds),
   ]);
+};
+
+/**
+ * 删除数据集
+ *
+ * 从系统中完全删除数据集及其相关数据，包括：
+ * 1. 删除所有文档片段
+ * 2. 删除所有文档
+ * 3. 删除关键词表
+ * 4. 删除查询历史
+ * 5. 删除向量数据库中的数据
+ */
+export const deleteDataset = async (datasetId: string) => {
+  try {
+    await db.transaction(async (tx) => {
+      await tx.delete(segment).where(eq(segment.datasetId, datasetId));
+      await tx.delete(document).where(eq(document.datasetId, datasetId));
+      await tx
+        .delete(keywordTable)
+        .where(eq(keywordTable.datasetId, datasetId));
+      await tx
+        .delete(datasetQuery)
+        .where(eq(datasetQuery.datasetId, datasetId));
+    });
+
+    const collection = vectorStoreCollection();
+    await collection.data.deleteMany(
+      collection.filter.byProperty('dataset_id').equal(datasetId),
+    );
+  } catch (error) {
+    log.error(
+      'Delete dataset failed, datasetId: %s, error: %o',
+      datasetId,
+      error,
+    );
+  }
 };

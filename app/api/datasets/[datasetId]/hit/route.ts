@@ -3,6 +3,11 @@
  * 提供使用指定知识库进行召回测试的功能
  */
 
+import { verifyApiKey } from '@/lib/auth/dal';
+import { handleRouteError, successResult } from '@/lib/route-common';
+import { hitDatasetReqSchema } from '@/schemas/dataset-schema';
+import { hitDataset } from '@/services/dataset';
+
 type Params = { params: Promise<{ datasetId: string }> };
 
 /**
@@ -140,6 +145,17 @@ type Params = { params: Promise<{ datasetId: string }> };
  *                   type: string
  *                   example: 召回测试成功
  */
-export async function POST() {
-  // TODO
+export async function POST(request: Request, { params }: Params) {
+  try {
+    const [{ userId }, { datasetId }, body] = await Promise.all([
+      verifyApiKey(),
+      params,
+      request.json(),
+    ]);
+    const req = hitDatasetReqSchema.parse(body);
+    const result = await hitDataset(userId, datasetId, req);
+    return successResult(result);
+  } catch (error) {
+    return handleRouteError(error);
+  }
 }

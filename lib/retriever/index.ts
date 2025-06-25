@@ -60,7 +60,7 @@ const defaultRetrievalConfig: RetrievalConfig = {
  * @param retrievalConfig - 检索配置参数
  * @returns 检索到的文档列表
  */
-const searchInDataset = async (
+export const searchInDataset = async (
   query: string,
   datasetIds: string[],
   userId: string,

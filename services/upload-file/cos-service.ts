@@ -10,7 +10,6 @@
  * 5. 获取文件访问 URL
  */
 
-// import { randomUUIDv7 } from 'bun';
 import { randomUUID } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
 import fs from 'node:fs/promises';

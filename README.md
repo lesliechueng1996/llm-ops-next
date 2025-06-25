@@ -24,6 +24,7 @@
 - **代码规范**: Biome
 - **包管理**: Bun
 - **对象存储**: 腾讯云 COS
+- **队列系统**: Redis + BullMQ
 - **AI 集成**:
   - LangChain
   - LangGraph
@@ -50,6 +51,9 @@
   - 关键词自动抽取（基于 nodejieba）
   - 支持 Weaviate 向量存储与检索
   - 文本分割与清洗（可自定义分隔符/分块/重叠）
+  - 数据集查询记录追踪
+  - 数据集召回测试（支持 full_text/semantic/hybrid 检索）
+  - 异步数据集删除任务
 - 内置工具集成
   - 天气查询
   - IP 地址查询
@@ -63,6 +67,15 @@
   - 代理思考过程记录
   - 长期记忆管理
   - 数据集查询记录追踪
+  - 应用发布管理
+  - 发布历史记录
+  - 发布回滚功能
+  - 智能问题建议
+- 队列管理系统
+  - 文档处理队列
+  - 数据集处理队列
+  - 异步任务管理
+  - 任务状态追踪
 
 ## API 文档
 
@@ -87,7 +100,17 @@
   - `/api/apps/:appId/draft-app-config` - 获取和更新应用的草稿配置信息
   - `/api/apps/:appId/summary` - 获取和更新应用的调试长记忆内容
   - `/api/apps/:appId/conversations` - 应用调试对话（流式事件响应）
+  - `/api/apps/:appId/conversations/debug` - 应用调试对话接口
+  - `/api/apps/:appId/conversations/messages` - 获取对话消息历史
   - `/api/apps/:appId/conversations/tasks/:taskId/stop` - 停止应用调试对话任务
+  - `/api/apps/:appId/publish` - 发布应用
+  - `/api/apps/:appId/publish/cancel` - 取消发布
+  - `/api/apps/:appId/publish/fallback` - 发布回滚
+  - `/api/apps/:appId/publish/histories` - 获取发布历史
+
+- `/api/ai` - AI 相关接口
+  - `/api/ai/suggested-questions` - 获取智能问题建议
+  - `/api/ai/optimize-prompt` - 提示词优化
 
 - `/api/openapi` - OpenAPI 相关接口
   - `/api/openapi/chat` - 聊天功能接口
@@ -136,6 +159,7 @@
 
 - Bun
 - PostgreSQL
+- Redis
 
 ### 安装
 
@@ -163,6 +187,11 @@ bun install
 ```bash
 bun run db:generate
 bun run db:push
+```
+
+5. 启动队列工作进程
+```bash
+bun run worker
 ```
 
 ### 开发
@@ -200,10 +229,21 @@ bun run start
 │   ├── keyword/           # 关键词抽取模块
 │   ├── text-splitter/     # 文本分割与清洗
 │   ├── memory/            # 记忆管理模块
+│   ├── queues/            # 队列管理
+│   │   ├── dataset-queue.ts    # 数据集队列
+│   │   ├── document-queue.ts   # 文档队列
+│   │   └── queue-name.ts       # 队列名称定义
+│   ├── retriever/         # 检索器模块
+│   │   ├── full-text-retriever.ts # 全文检索
+│   │   ├── semantic-retriever.ts  # 语义检索
+│   │   └── index.ts              # 检索器入口
 │   └── ...
 ├── public/        # 静态资源
 ├── schemas/       # 数据模型和验证
 ├── services/      # 业务逻辑服务
+├── workers/       # 队列工作进程
+│   ├── dataset-worker.ts  # 数据集处理工作进程
+│   └── document-worker.ts # 文档处理工作进程
 └── exceptions/    # 异常处理
 ```
 
@@ -217,5 +257,12 @@ bun run start
 - `bun run db:push` - 更新数据库架构
 - `bun run db:generate` - 生成数据库迁移文件
 - `bun run db:migrate` - 执行数据库迁移
+- `bun run worker` - 启动队列工作进程
 
+## Docker 部署
+
+使用 Docker Compose 快速部署：
+
+```bash
 docker compose up -d
+```

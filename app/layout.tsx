@@ -22,6 +22,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import ModalProvider from '@/components/ModalProvider';
 
 // 应用元数据配置
 // 这些配置将用于 SEO 和浏览器标签页显示
@@ -46,7 +47,7 @@ export default function RootLayout({
     <html lang="en">
       {/* 全局样式和子组件将被注入到这里 */}
       <body>
-        {children}
+        <ModalProvider>{children}</ModalProvider>
         {/* Toaster 组件用于显示全局通知消息 */}
         <Toaster position="top-center" richColors closeButton />
       </body>

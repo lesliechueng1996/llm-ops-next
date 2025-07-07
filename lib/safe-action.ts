@@ -16,7 +16,7 @@ import { eq } from 'drizzle-orm';
 import { createSafeActionClient } from 'next-safe-action';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 import { log } from './logger';
 
 // 创建基础安全操作客户端，配置元数据模式和错误处理
@@ -33,10 +33,32 @@ export const actionClient = createSafeActionClient({
     log.error('clientInput: %o', clientInput);
     log.error('metadata: %o', metadata);
     log.error('Error: %o', error);
+    // 处理 Zod 验证错误
+    if (error instanceof ZodError) {
+      const errorMessage = error.issues
+        .map((item) => {
+          if (item.path.length === 0) {
+            return item.message;
+          }
+          const path = item.path.join('.');
+          return `${path}: ${item.message}`;
+        })
+        .join('; ');
+
+      log.error('请求参数错误: %o', error);
+      return errorMessage;
+    }
+
+    // 处理自定义业务异常
     if (error instanceof BaseException) {
+      log.error('业务异常: %o', error);
       return error.message;
     }
-    return '服务器错误';
+
+    // 处理未知错误
+    log.error('未知错误: %o', error);
+    console.error(error);
+    return '未知错误';
   },
 }).use(async ({ next, clientInput, metadata }) => {
   // 性能监控中间件

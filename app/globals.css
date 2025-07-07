@@ -121,3 +121,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility required-label {
+  &::after {
+    content: '*';
+    color: red;
+    padding-left: 0.25rem;
+  }
+}

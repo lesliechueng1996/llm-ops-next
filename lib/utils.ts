@@ -91,7 +91,7 @@ export const getActionErrorMsg = (
         serverError?: string;
         validationErrors?: {
           _errors?: string[];
-          [key: string]: { _errors?: string[] } | string[] | undefined;
+          [key: string]: unknown;
         };
       }
     | undefined,
@@ -115,8 +115,16 @@ export const getActionErrorMsg = (
 
     // 处理字段错误
     for (const [key, value] of Object.entries(actionResult.validationErrors)) {
-      if (key !== '_errors' && value && '_errors' in value) {
-        errors.push(...(value._errors || []));
+      if (
+        key !== '_errors' &&
+        value &&
+        typeof value === 'object' &&
+        '_errors' in value
+      ) {
+        const errorArray = (value as { _errors?: string[] })._errors;
+        if (Array.isArray(errorArray)) {
+          errors.push(...errorArray);
+        }
       }
     }
 

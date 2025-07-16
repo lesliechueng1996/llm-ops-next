@@ -1,6 +1,16 @@
 /**
  * API工具相关的Schema定义
- * 包含创建、更新、验证和获取API工具列表的请求和响应类型定义
+ *
+ * 本模块定义了与API工具相关的所有Zod验证Schema和TypeScript类型定义，
+ * 包括创建、更新、删除、验证和获取API工具的各种请求和响应类型。
+ *
+ * 主要功能：
+ * - API工具的创建和更新验证
+ * - OpenAPI Schema的验证
+ * - API工具列表的获取和分页
+ * - API工具提供者的管理
+ *
+ * 所有Schema都使用Zod进行运行时类型验证，确保API请求和响应的类型安全。
  */
 
 import { z } from 'zod';
@@ -98,3 +108,55 @@ export type GetApiToolListRes = {
     }[];
   }[];
 };
+
+/**
+ * 获取API工具提供者的请求Schema
+ * @property providerId - 提供者ID，必须是有效的UUID格式
+ */
+export const getApiToolProviderReqSchema = z.object({
+  providerId: z
+    .string({ message: 'providerId应为字符串' })
+    .uuid({ message: 'providerId应为UUID' }),
+});
+
+/**
+ * 获取API工具提供者的响应类型
+ * @property id - 提供者ID
+ * @property name - 提供者名称
+ * @property icon - 提供者图标URL
+ * @property description - 提供者描述
+ * @property openapiSchema - OpenAPI规范文档
+ * @property headers - API请求头配置
+ * @property createdAt - 创建时间戳
+ */
+export type GetApiToolProviderRes = {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  openapiSchema: string;
+  headers: { key: string; value: string }[];
+  createdAt: number;
+};
+
+/**
+ * 删除API工具提供者的请求Schema
+ * @property providerId - 要删除的提供者ID，必须是有效的UUID格式
+ */
+export const deleteApiToolProviderReqSchema = z.object({
+  providerId: z
+    .string({ message: 'providerId应为字符串' })
+    .uuid({ message: 'providerId应为UUID' }),
+});
+
+/**
+ * 更新API工具操作的请求Schema
+ * @property providerId - 提供者ID，必须是有效的UUID格式
+ * @property data - 更新API工具的数据，使用updateApiToolReqSchema进行验证
+ */
+export const updateApiToolActionReqSchema = z.object({
+  providerId: z
+    .string({ message: 'providerId应为字符串' })
+    .uuid({ message: 'providerId应为UUID' }),
+  data: updateApiToolReqSchema,
+});

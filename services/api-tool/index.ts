@@ -21,6 +21,7 @@ import { calculatePagination, paginationResult } from '@/lib/paginator';
 import type {
   CreateApiToolReq,
   GetApiToolListRes,
+  GetApiToolProviderRes,
   UpdateApiToolReq,
 } from '@/schemas/api-tool-schema';
 import type { SearchPageReq } from '@/schemas/common-schema';
@@ -160,6 +161,7 @@ export const deleteApiTool = async (userId: string, providerId: string) => {
         ),
       );
   });
+  return providerId;
 };
 
 /**
@@ -224,6 +226,7 @@ export const updateApiTool = async (
       })),
     );
   });
+  return providerId;
 };
 
 /**
@@ -259,7 +262,7 @@ export const getApiToolProvider = async (
     openapiSchema: record.openapiSchema,
     headers: record.headers,
     createdAt: record.createdAt.getTime(),
-  };
+  } as GetApiToolProviderRes;
 };
 
 /**

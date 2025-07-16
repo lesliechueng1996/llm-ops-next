@@ -6,7 +6,7 @@ import { handleKeyUpAsClick } from '@/lib/utils';
 import { useState } from 'react';
 
 /**
- * 内置工具卡片组件的属性类型定义
+ * 内置/API工具卡片组件的属性类型定义
  */
 type Props = {
   /** 工具名称 */
@@ -48,7 +48,7 @@ const formatInputType = (type: string) => {
 };
 
 /**
- * 内置工具卡片组件
+ * 内置/API工具卡片组件
  *
  * 这是一个可展开的卡片组件，用于显示内置工具的详细信息。
  * 用户可以点击卡片来展开/收起工具的输入参数列表。
@@ -56,9 +56,9 @@ const formatInputType = (type: string) => {
  * @param label - 工具名称
  * @param description - 工具描述
  * @param inputs - 工具输入参数列表
- * @returns 渲染的内置工具卡片组件
+ * @returns 渲染的内置/API工具卡片组件
  */
-const BuiltinToolSheetCard = ({ label, description, inputs }: Props) => {
+const ToolSheetCard = ({ label, description, inputs }: Props) => {
   // 控制参数列表的显示/隐藏状态
   const [isInputsDisplay, setIsInputsDisplay] = useState(false);
 
@@ -71,21 +71,21 @@ const BuiltinToolSheetCard = ({ label, description, inputs }: Props) => {
 
   return (
     <Card
-      className="px-4 py-3 cursor-pointer"
+      className="px-4 py-3 cursor-pointer gap-2"
       tabIndex={0}
       onClick={handleToolCardClick}
       onKeyUp={handleKeyUpAsClick}
     >
       {/* 工具标题 */}
-      <h1 className="text-sm font-bold text-foreground mb-1.5">{label}</h1>
+      <h1 className="text-sm font-bold text-foreground">{label}</h1>
       {/* 工具描述 */}
       <p className="text-xs text-muted-foreground">{description}</p>
 
       {/* 条件渲染参数列表 */}
       {isInputsDisplay && (
-        <div>
+        <div className="space-y-4">
           {/* 参数标题区域 */}
-          <div className="flex items-center gap-2 py-2">
+          <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-muted-foreground shrink-0">
               参数
             </span>
@@ -115,4 +115,4 @@ const BuiltinToolSheetCard = ({ label, description, inputs }: Props) => {
   );
 };
 
-export default BuiltinToolSheetCard;
+export default ToolSheetCard;

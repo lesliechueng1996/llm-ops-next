@@ -34,6 +34,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import useModal from '@/hooks/useModal';
 import { getActionErrorMsg } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Trash2 } from 'lucide-react';
@@ -109,6 +110,7 @@ export type FormData = ToolFormData & { icon: string };
 type Props = {
   defaultValues?: FormData;
   onSubmit: (values: FormData) => Promise<void>;
+  onDelete?: () => Promise<void>;
 };
 
 /**
@@ -121,6 +123,7 @@ type Props = {
  * @param {Props} props - 组件属性
  * @param {FormData} [props.defaultValues] - 表单默认值，用于编辑现有工具
  * @param {function(FormData): Promise<void>} props.onSubmit - 表单提交处理函数
+ * @param {function(): Promise<void>} [props.onDelete] - 删除工具处理函数
  *
  * @returns {JSX.Element} 工具表单组件
  *
@@ -135,7 +138,9 @@ type Props = {
  *   onSubmit={handleUpdateTool}
  * />
  */
-const ToolForm = ({ defaultValues, onSubmit }: Props) => {
+const ToolForm = ({ defaultValues, onSubmit, onDelete }: Props) => {
+  const { closeModal } = useModal();
+
   const form = useForm<ToolFormData>({
     resolver: zodResolver(toolFormSchema),
     defaultValues: {
@@ -152,6 +157,7 @@ const ToolForm = ({ defaultValues, onSubmit }: Props) => {
 
   const [tools, setTools] = useState<ToolInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const uploadImageRef = useRef<ImageUploadRef>(null);
 
   /**
@@ -177,6 +183,24 @@ const ToolForm = ({ defaultValues, onSubmit }: Props) => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /**
+   * 处理删除工具操作
+   *
+   * 调用父组件的删除处理函数，并处理删除过程中的状态
+   *
+   * @returns {Promise<void>}
+   */
+  const handleDelete = async () => {
+    setIsDeleteLoading(true);
+    try {
+      if (onDelete) {
+        await onDelete();
+      }
+    } finally {
+      setIsDeleteLoading(false);
     }
   };
 
@@ -419,11 +443,21 @@ const ToolForm = ({ defaultValues, onSubmit }: Props) => {
           </div>
 
           {/* 表单操作按钮区域 */}
-          <div className="text-right space-x-4">
-            <Button type="button" variant="secondary">
-              取消
-            </Button>
-            <LoadingButton type="submit" text="保存" isLoading={isLoading} />
+          <div className="flex justify-between">
+            {onDelete && (
+              <LoadingButton
+                text="删除"
+                isLoading={isDeleteLoading}
+                variant="destructive"
+                onClick={handleDelete}
+              />
+            )}
+            <div className="text-right space-x-4">
+              <Button type="button" variant="secondary" onClick={closeModal}>
+                取消
+              </Button>
+              <LoadingButton type="submit" text="保存" isLoading={isLoading} />
+            </div>
           </div>
         </form>
       </Form>

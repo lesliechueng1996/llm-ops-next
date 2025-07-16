@@ -8,6 +8,7 @@
  * @param {Object} props - 组件属性
  * @param {boolean} [props.isLoading=false] - 是否处于加载状态
  * @param {string} props.text - 按钮显示的文本
+ * @param {ReactNode} [props.icon] - 按钮显示的图标
  * @returns {JSX.Element} 返回一个带有加载状态的按钮组件
  *
  * @example
@@ -15,25 +16,28 @@
  * <LoadingButton
  *   text="提交"
  *   isLoading={true}
+ *   icon={<Pencil />}
  *   onClick={() => console.log('Button clicked')}
  * />
  * ```
  */
 import { Button } from '@/components/ui/button';
 import { LoaderCircle } from 'lucide-react';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 // 组件属性类型定义
 type Props = ComponentProps<typeof Button> & {
   isLoading?: boolean;
   text: string;
+  icon?: ReactNode;
 };
 
-const LoadingButton = ({ text, isLoading = false, ...props }: Props) => {
+const LoadingButton = ({ text, isLoading = false, icon, ...props }: Props) => {
   return (
     <Button {...props} disabled={isLoading}>
       {/* 加载状态下显示旋转的加载图标 */}
       {isLoading && <LoaderCircle className="animate-spin" />}
+      {!isLoading && icon}
       {text}
     </Button>
   );

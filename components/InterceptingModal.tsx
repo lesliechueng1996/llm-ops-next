@@ -23,6 +23,8 @@ type Props = {
   children: ReactNode;
   /** 模态框唯一标识名称，用于控制显示/隐藏 */
   name: string;
+  /** 模态框关闭回调 */
+  onClose?: () => void;
 };
 
 /**
@@ -51,7 +53,13 @@ type Props = {
  * </InterceptingModal>
  * ```
  */
-const InterceptingModal = ({ title, description, children, name }: Props) => {
+const InterceptingModal = ({
+  title,
+  description,
+  children,
+  name,
+  onClose,
+}: Props) => {
   const [open, setOpen] = useState(false);
   const { modalName, isOpen, closeModal } = useModal();
 
@@ -68,6 +76,7 @@ const InterceptingModal = ({ title, description, children, name }: Props) => {
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
+      onClose?.();
       closeModal();
     }
     setOpen(open);

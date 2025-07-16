@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { getActionErrorMsg } from '@/lib/utils';
 import ToolForm, { type FormData } from './ToolForm';
 import useModal from '@/hooks/useModal';
+import { useQueryClient } from '@tanstack/react-query';
 
 /**
  * 创建工具表单组件
@@ -22,6 +23,21 @@ import useModal from '@/hooks/useModal';
  */
 const CreateToolForm = () => {
   const { closeModal } = useModal();
+  const queryClient = useQueryClient();
+
+  /**
+   * 重新加载API工具列表
+   *
+   * 当API工具列表发生变化时，调用此函数刷新列表数据。
+   * 通过查询客户端的缓存，确保列表数据是最新的。
+   *
+   * @returns {void} 无返回值
+   */
+  const reloadApiTools = () => {
+    queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey[0] === 'api-tools',
+    });
+  };
 
   /**
    * 保存 API 工具
@@ -41,6 +57,7 @@ const CreateToolForm = () => {
 
     toast.success('插件创建成功');
     closeModal();
+    reloadApiTools();
   };
 
   return <ToolForm onSubmit={saveApiTool} />;

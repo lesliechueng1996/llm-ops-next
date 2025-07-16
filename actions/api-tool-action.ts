@@ -7,20 +7,32 @@
  * - 验证 OpenAPI schema 的有效性
  * - 创建和保存 API 工具提供者
  * - 分页获取 API 工具列表
+ * - 获取单个 API 工具提供者详情
+ * - 删除 API 工具提供者
+ * - 更新 API 工具提供者配置
  *
- * 所有 actions 都需要用户认证，并使用 authActionClient 进行包装
+ * 所有 actions 都需要用户认证，并使用 authActionClient 进行包装。
+ * 每个 action 都包含输入验证、错误处理和用户权限检查。
+ *
+ * @fileoverview API 工具管理相关的服务器端操作集合
  */
 
 import { authActionClient } from '@/lib/safe-action';
 import {
   createApiToolReqSchema,
+  deleteApiToolProviderReqSchema,
   getApiToolListReqSchema,
+  getApiToolProviderReqSchema,
+  updateApiToolActionReqSchema,
   validateOpenapiSchemaReqSchema,
 } from '@/schemas/api-tool-schema';
 import {
   validateOpenapiSchema,
   createApiTool,
   listApiToolsByPage,
+  getApiToolProvider,
+  deleteApiTool,
+  updateApiTool,
 } from '@/services/api-tool';
 
 /**
@@ -110,4 +122,99 @@ export const fetchApiToolsByPageAction = authActionClient
   })
   .action(async ({ parsedInput, ctx: { userId } }) =>
     listApiToolsByPage(userId, parsedInput),
+  );
+
+/**
+ * 获取 API 工具提供者详情
+ *
+ * 此 action 用于获取指定 API 工具提供者的详细信息。
+ * 根据提供者 ID 返回完整的工具配置信息，包括基础 URL、OpenAPI schema 等。
+ *
+ * @param parsedInput - 包含提供者 ID 的对象
+ * @param parsedInput.providerId - 要获取详情的提供者 ID
+ * @param ctx.userId - 当前用户的 ID（通过认证上下文提供）
+ * @returns Promise<ApiToolProvider> - 返回提供者的详细信息
+ * @throws 当提供者不存在或用户无权限访问时抛出相应异常
+ *
+ * @example
+ * ```typescript
+ * const provider = await getApiToolProviderAction({
+ *   providerId: 'provider-123'
+ * });
+ * // 返回: { id: 'provider-123', name: 'Weather API', baseUrl: 'https://api.weather.com', ... }
+ * ```
+ */
+export const getApiToolProviderAction = authActionClient
+  .schema(getApiToolProviderReqSchema)
+  .metadata({
+    actionName: 'getApiToolProvider',
+  })
+  .action(async ({ parsedInput, ctx: { userId } }) =>
+    getApiToolProvider(userId, parsedInput.providerId),
+  );
+
+/**
+ * 删除 API 工具提供者
+ *
+ * 此 action 用于删除指定的 API 工具提供者。
+ * 删除操作会移除提供者的所有配置信息，包括相关的工具定义。
+ * 此操作不可逆，请谨慎使用。
+ *
+ * @param parsedInput - 包含提供者 ID 的对象
+ * @param parsedInput.providerId - 要删除的提供者 ID
+ * @param ctx.userId - 当前用户的 ID（通过认证上下文提供）
+ * @returns Promise<boolean> - 删除成功返回 true
+ * @throws 当提供者不存在、用户无权限或删除过程中发生错误时抛出相应异常
+ *
+ * @example
+ * ```typescript
+ * const success = await deleteApiToolProviderAction({
+ *   providerId: 'provider-123'
+ * });
+ * // 返回: true (删除成功)
+ * ```
+ */
+export const deleteApiToolProviderAction = authActionClient
+  .schema(deleteApiToolProviderReqSchema)
+  .metadata({
+    actionName: 'deleteApiToolProvider',
+  })
+  .action(async ({ parsedInput, ctx: { userId } }) =>
+    deleteApiTool(userId, parsedInput.providerId),
+  );
+
+/**
+ * 更新 API 工具提供者配置
+ *
+ * 此 action 用于更新指定 API 工具提供者的配置信息。
+ * 支持更新提供者名称、基础 URL、OpenAPI schema 等所有配置项。
+ * 更新操作会保留原有的提供者 ID，只修改配置内容。
+ *
+ * @param parsedInput - 包含更新信息的对象
+ * @param parsedInput.providerId - 要更新的提供者 ID
+ * @param parsedInput.data - 包含更新字段的对象（name、baseUrl、openapiSchema 等）
+ * @param ctx.userId - 当前用户的 ID（通过认证上下文提供）
+ * @returns Promise<ApiToolProvider> - 返回更新后的提供者信息
+ * @throws 当提供者不存在、用户无权限或更新过程中发生错误时抛出相应异常
+ *
+ * @example
+ * ```typescript
+ * const updatedProvider = await updateApiToolProviderAction({
+ *   providerId: 'provider-123',
+ *   data: {
+ *     name: 'Updated Weather API',
+ *     baseUrl: 'https://api.weather-v2.com',
+ *     openapiSchema: { ... }
+ *   }
+ * });
+ * // 返回更新后的提供者信息
+ * ```
+ */
+export const updateApiToolProviderAction = authActionClient
+  .schema(updateApiToolActionReqSchema)
+  .metadata({
+    actionName: 'updateApiToolProvider',
+  })
+  .action(async ({ parsedInput, ctx: { userId } }) =>
+    updateApiTool(userId, parsedInput.providerId, parsedInput.data),
   );

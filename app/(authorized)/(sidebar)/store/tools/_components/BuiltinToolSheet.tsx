@@ -7,13 +7,13 @@ import {
 } from '@/components/ui/sheet';
 import type { ComponentProps } from 'react';
 import BuiltinToolCardHeader from './BuiltinToolCardHeader';
-import BuiltinToolSheetCard from './BuiltinToolSheetCard';
+import ToolSheetCard from '@/app/(authorized)/(sidebar)/_components/ToolSheetCard';
 
 /**
  * 工具卡片组件的 Props 类型
- * 继承自 BuiltinToolSheetCard 组件的所有属性
+ * 继承自 ToolSheetCard 组件的所有属性
  */
-type ToolProp = ComponentProps<typeof BuiltinToolSheetCard>;
+type ToolProp = ComponentProps<typeof ToolSheetCard>;
 
 /**
  * BuiltinToolSheet 组件的 Props 类型定义
@@ -96,7 +96,7 @@ const BuiltinToolSheet = ({
             <div className="space-y-2 overflow-y-auto h-full no-scrollbar">
               {/* 遍历渲染每个工具卡片 */}
               {tools.map((tool) => (
-                <BuiltinToolSheetCard key={tool.label} {...tool} />
+                <ToolSheetCard key={tool.label} {...tool} />
               ))}
             </div>
           </div>

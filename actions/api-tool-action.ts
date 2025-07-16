@@ -6,6 +6,7 @@
  * 本文件包含了处理 API 工具相关操作的服务器端 actions，包括：
  * - 验证 OpenAPI schema 的有效性
  * - 创建和保存 API 工具提供者
+ * - 分页获取 API 工具列表
  *
  * 所有 actions 都需要用户认证，并使用 authActionClient 进行包装
  */
@@ -13,9 +14,14 @@
 import { authActionClient } from '@/lib/safe-action';
 import {
   createApiToolReqSchema,
+  getApiToolListReqSchema,
   validateOpenapiSchemaReqSchema,
 } from '@/schemas/api-tool-schema';
-import { validateOpenapiSchema, createApiTool } from '@/services/api-tool';
+import {
+  validateOpenapiSchema,
+  createApiTool,
+  listApiToolsByPage,
+} from '@/services/api-tool';
 
 /**
  * 验证 OpenAPI schema 的有效性
@@ -69,7 +75,39 @@ export const saveApiToolProviderAction = authActionClient
   .metadata({
     actionName: 'saveApiToolProvider',
   })
-  .action(async ({ parsedInput, ctx: { userId } }) => {
-    const providerId = await createApiTool(userId, parsedInput);
-    return providerId;
-  });
+  .action(async ({ parsedInput, ctx: { userId } }) =>
+    createApiTool(userId, parsedInput),
+  );
+
+/**
+ * 分页获取 API 工具列表
+ *
+ * 此 action 用于分页获取当前用户的 API 工具列表。
+ * 支持根据关键词搜索过滤、排序和分页显示。
+ *
+ * @param parsedInput - 包含分页和搜索参数的对象
+ * @param parsedInput.page - 当前页码（从 1 开始）
+ * @param parsedInput.pageSize - 每页显示的项目数量
+ * @param parsedInput.keyword - 可选的搜索关键词，用于过滤工具名称
+ * @param ctx.userId - 当前用户的 ID（通过认证上下文提供）
+ * @returns Promise<{data: ApiTool[], total: number, page: number, pageSize: number}> - 分页数据结果
+ * @throws 当获取过程中发生错误时抛出相应异常
+ *
+ * @example
+ * ```typescript
+ * const result = await fetchApiToolsByPageAction({
+ *   page: 1,
+ *   pageSize: 10,
+ *   keyword: 'weather'
+ * });
+ * // 返回: { data: [...], total: 25, page: 1, pageSize: 10 }
+ * ```
+ */
+export const fetchApiToolsByPageAction = authActionClient
+  .schema(getApiToolListReqSchema)
+  .metadata({
+    actionName: 'fetchApiToolsByPage',
+  })
+  .action(async ({ parsedInput, ctx: { userId } }) =>
+    listApiToolsByPage(userId, parsedInput),
+  );

@@ -111,10 +111,12 @@ export const uploadFile = pgTable(
     extension: text('extension').notNull().default(''),
     mimeType: text('mime_type').notNull().default(''),
     hash: text('hash').notNull().default(''),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [index('idx_upload_file_user_id').on(table.userId)],
@@ -132,10 +134,16 @@ export const apiToolProvider = pgTable(
     description: text('description').notNull().default(''),
     openapiSchema: text('openapi_schema').notNull().default(''),
     headers: jsonb('headers').notNull().default('{}'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => {
+        const now = new Date();
+        console.log('now!!!!', now.getTime());
+        return now;
+      })
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
@@ -159,10 +167,12 @@ export const apiTool = pgTable(
     url: text('url').notNull().default(''),
     method: text('method').notNull().default(''),
     parameters: jsonb('parameters').notNull().default('[]'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
@@ -181,10 +191,12 @@ export const dataset = pgTable(
     name: text('name').notNull().default(''),
     icon: text('icon').notNull().default(''),
     description: text('description').notNull().default(''),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
@@ -205,10 +217,12 @@ export const processRule = pgTable(
       .references(() => dataset.id, { onDelete: 'cascade' }),
     mode: text('mode').notNull().default(''),
     rule: jsonb('rule').notNull().default('{}'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
@@ -250,10 +264,12 @@ export const document = pgTable(
     enabled: boolean('enabled').notNull().default(false),
     disabledAt: timestamp('disabled_at'),
     status: text('status').notNull().default(''),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
@@ -290,10 +306,12 @@ export const segment = pgTable(
     stoppedAt: timestamp('stopped_at'),
     error: text('error'),
     status: text('status').notNull().default(''),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
@@ -314,10 +332,12 @@ export const keywordTable = pgTable(
       .notNull()
       .references(() => dataset.id, { onDelete: 'cascade' }),
     keywords: jsonb('keywords').notNull().default('{}'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [unique('uq_keyword_table_dataset_id').on(table.datasetId)],
@@ -337,10 +357,12 @@ export const app = pgTable(
     appConfigId: text('app_config_id'),
     draftAppConfigId: text('draft_app_config_id'),
     debugConversationId: text('debug_conversation_id'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [index('idx_app_user_id').on(table.userId)],
@@ -356,10 +378,12 @@ export const appDatasetJoin = pgTable(
     datasetId: uuid('dataset_id')
       .notNull()
       .references(() => dataset.id, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
@@ -390,10 +414,12 @@ export const appConfig = pgTable(
       .notNull()
       .default('{}'),
     reviewConfig: jsonb('review_config').notNull().default('{}'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [index('idx_app_config_app_id').on(table.appId)],
@@ -424,10 +450,12 @@ export const appConfigVersion = pgTable(
     reviewConfig: jsonb('review_config').notNull().default('{}'),
     version: integer('version').notNull().default(0),
     configType: text('config_type').notNull().default(''),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
@@ -452,10 +480,12 @@ export const conversation = pgTable(
     isDeleted: boolean('is_deleted').notNull().default(false),
     invokeFrom: text('invoke_from').notNull().default(''),
     createdBy: text('created_by').notNull().default(''),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [index('idx_conversation_app_id').on(table.appId)],
@@ -513,10 +543,12 @@ export const message = pgTable(
     })
       .notNull()
       .default('0.0'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
@@ -584,10 +616,12 @@ export const messageAgentThought = pgTable(
       .notNull()
       .default('0.0'),
     latency: real('latency').notNull().default(0.0),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
@@ -610,10 +644,12 @@ export const datasetQuery = pgTable(
     source: text('source').notNull().default(''),
     sourceAppId: uuid('source_app_id'),
     createdBy: text('created_by').notNull().default(''),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at')
+      .$defaultFn(() => new Date())
+      .notNull(),
     updatedAt: timestamp('updated_at')
       .notNull()
-      .defaultNow()
+      .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
   (table) => [index('idx_dataset_query_dataset_id').on(table.datasetId)],

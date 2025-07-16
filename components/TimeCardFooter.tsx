@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AvatarImage } from '@radix-ui/react-avatar';
-import { format } from 'date-fns';
+import { format } from 'date-fns-tz';
 
 /**
  * TimeCardFooter组件的属性类型定义

@@ -13,7 +13,7 @@ import { auth } from '@/lib/auth/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { ClientProvider } from './_component/ClientProvider';
 
 const AuthorizedLayout = async ({ children }: { children: ReactNode }) => {
   const session = await auth.api.getSession({
@@ -26,7 +26,7 @@ const AuthorizedLayout = async ({ children }: { children: ReactNode }) => {
 
   return (
     <main className="w-screen h-screen">
-      <NuqsAdapter>{children}</NuqsAdapter>
+      <ClientProvider>{children}</ClientProvider>
     </main>
   );
 };

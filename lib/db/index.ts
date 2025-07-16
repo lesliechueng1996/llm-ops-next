@@ -10,11 +10,12 @@
  * 3. 提供统一的数据库访问接口
  */
 
-import { type BunSQLDatabase, drizzle } from 'drizzle-orm/bun-sql';
+// import { type BunSQLDatabase, drizzle } from 'drizzle-orm/bun-sql';
+import { type NodePgDatabase, drizzle } from 'drizzle-orm/node-postgres';
 
 // 定义全局类型，用于存储数据库连接实例
 const globalForDrizzle = global as unknown as {
-  drizzleClient: BunSQLDatabase;
+  drizzleClient: NodePgDatabase;
 };
 
 // 初始化数据库连接

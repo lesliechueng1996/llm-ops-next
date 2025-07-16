@@ -127,6 +127,13 @@
       "when": 1749987843913,
       "tag": "0017_familiar_kronos",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1752391704195,
+      "tag": "0018_exotic_jubilee",
+      "breakpoints": true
     }
   ]
 }
